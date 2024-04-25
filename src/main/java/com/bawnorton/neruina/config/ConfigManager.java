@@ -29,7 +29,7 @@ public final class ConfigManager {
             config.autoKillTickingEntities = false;
         }
         if (config.tickingExceptionThreshold == null) {
-            config.tickingExceptionThreshold = 20;
+            config.tickingExceptionThreshold = 10;
         }
         if (config.handleTickingEntities == null) {
             config.handleTickingEntities = true;
