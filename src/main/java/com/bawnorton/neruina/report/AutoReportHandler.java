@@ -2,6 +2,7 @@ package com.bawnorton.neruina.report;
 
 import com.bawnorton.neruina.Neruina;
 import com.bawnorton.neruina.platform.Platform;
+import com.bawnorton.neruina.thread.ThreadUtils;
 import com.bawnorton.neruina.util.Reflection;
 import com.bawnorton.neruina.util.TickingEntry;
 import com.google.gson.stream.JsonReader;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URL;
 import java.security.CodeSource;
 import java.util.ArrayList;
@@ -82,7 +84,7 @@ public final class AutoReportHandler {
         *//*? }*/
     }
 
-    public CompletableFuture<Pair<ReportCode, String>> createReports(TickingEntry entry) {
+    public CompletableFuture<Pair<ReportCode, String>> createReports(MinecraftServer server, TickingEntry entry) {
         return GithubAuthManager.getOrLogin().thenApply(github -> {
             if (reportedEntries.contains(entry)) {
                 return Pair.of(ReportCode.ALREADY_EXISTS, "");
@@ -112,12 +114,12 @@ public final class AutoReportHandler {
                 });
                 if (repository == null) return;
 
-                GHIssue issue = createIssue(repository, entry);
+                GHIssue issue = ThreadUtils.onThread(server, () -> createIssue(repository, entry));
                 if (issue != null) {
                     issues.put(modid, issue);
                 }
             });
-            GHIssue masterIssue = createMasterIssue(github, issues, entry);
+            GHIssue masterIssue = ThreadUtils.onThread(server, () -> createMasterIssue(github, issues, entry));
             String url = masterIssue != null ? masterIssue.getHtmlUrl().toString() : null;
             return Pair.of(ReportCode.SUCCESS, url);
         }).thenApply(result -> {
@@ -170,9 +172,6 @@ public final class AutoReportHandler {
         }
         IssueFormatter formatter = masterConfig.createIssueFormatter();
         GHIssueBuilder builder = masterRepo.createIssueBuilder(formatter.getTitle(tickingEntry)).body(body);
-        formatter.getLabels().forEach(builder::label);
-        formatter.getAssignees().forEach(builder::assignee);
-        issueMap.keySet().forEach(builder::label);
         try {
             return builder.create();
         } catch (IOException e) {
@@ -186,8 +185,6 @@ public final class AutoReportHandler {
         IssueFormatter formatter = config.createIssueFormatter();
         GHIssueBuilder builder = reference.createIssueBuilder(formatter.getTitle(entry))
                 .body(formatter.getBody(entry));
-        formatter.getLabels().forEach(builder::label);
-        formatter.getAssignees().forEach(builder::assignee);
         try {
             return builder.create();
         } catch (IOException e) {
@@ -210,7 +207,7 @@ public final class AutoReportHandler {
 
             String methodName = element.getMethodName();
             String modid = checkForMixin(clazz, methodName);
-            if (modid != null && !modid.equals("minecraft")) {
+            if (modid != null) {
                 modids.add(modid);
                 continue;
             }
@@ -218,13 +215,13 @@ public final class AutoReportHandler {
             CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
             if (codeSource == null) continue;
 
-            String location = codeSource.getLocation().getPath();
-            location = location.substring(location.lastIndexOf('/') + 1);
-            modid = Platform.modidFromJar(location);
-            if (modid != null && !modid.equals("minecraft")) {
-                modids.add(modid);
+            URL resource = codeSource.getLocation();
+            String modidFromResource = modidFromResource(resource);
+            if (modidFromResource != null) {
+                modids.add(modidFromResource);
             }
         }
+        modids.removeIf(modid -> modid.equals(Neruina.MOD_ID) || modid.equals("minecraft"));
         return modids;
     }
 
@@ -241,8 +238,19 @@ public final class AutoReportHandler {
         URL resource = classLoader.getResource(mixinClassName.replace('.', '/') + ".class");
         if (resource == null) return null;
 
+        return modidFromResource(resource);
+    }
+
+    @Nullable
+    private static String modidFromResource(URL resource) {
         String location = resource.getPath();
-        location = location.substring(location.lastIndexOf('/') + 1);
-        return Platform.modidFromJar(location);
+        int index = location.indexOf("!");
+        if (index != -1) {
+            location = location.substring(0, index);
+            if (location.endsWith(".jar")) {
+                return Platform.modidFromJar(location);
+            }
+        }
+        return null;
     }
 }

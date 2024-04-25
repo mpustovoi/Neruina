@@ -32,7 +32,6 @@ public class IssueFormatter {
         Generated Report:
         <report>
         """;
-    private static final List<String> DEFAULT_LABELS = List.of("bug", "auto-report");
 
     private final AutoReportConfig config;
 
@@ -69,14 +68,6 @@ public class IssueFormatter {
 
     public String getBody(TickingEntry entry) {
         return replacePlaceholders((config.body() == null) ? DEFAULT_BODY : config.body(), Restriction.BODY, entry);
-    }
-
-    public List<String> getLabels() {
-        return config.labels() == null ? DEFAULT_LABELS : config.labels();
-    }
-
-    public List<String> getAssignees() {
-        return config.assignees() == null ? List.of() : config.assignees();
     }
 
     private record Placeholder(String key, boolean isModifiable, Restriction restriction, Applier applier) {

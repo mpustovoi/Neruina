@@ -1,7 +1,6 @@
-//file:noinspection All
 plugins {
-	id 'dev.architectury.loom' version "1.5-SNAPSHOT"
-	id 'me.modmuss50.mod-publish-plugin' version "0.4.5"
+	id 'dev.architectury.loom' version "1.6-SNAPSHOT"
+	id 'me.modmuss50.mod-publish-plugin' version "0.4.+"
 }
 
 def project_name = loom.project.name as String
@@ -9,6 +8,7 @@ def isFabric = project_name.contains("fabric")
 def isNeoForge = project_name.contains("neoforge")
 def isForge = project_name.contains("forge") && !isNeoForge
 def mod_loader = isFabric ? "fabric" : isForge ? "forge" : isNeoForge ? "neoforge" : null
+def java_version = project.deps_java as int
 def minecraft_version = project.deps_minecraft
 def minecraft_dependency = project.mod_minecraft_dependency
 def loader_version = isForge ? project.deps_fml : isNeoForge ? project.deps_neoforge : project.deps_fabric_loader
@@ -41,12 +41,24 @@ repositories {
 	maven { url = "https://oss.sonatype.org/content/repositories/snapshots" }
 	maven { url = "https://maven.kikugie.dev/releases" }
 	maven { url = "https://maven.neoforged.net/releases/" }
+	mavenLocal()
+	mavenCentral()
 }
 
 dependencies {
 	minecraft "com.mojang:minecraft:$minecraft_version"
-	mappings "net.fabricmc:yarn:$minecraft_version+build.${project.deps_yarn_build}:v2"
+
+	if(isNeoForge) {
+		mappings loom.layered {
+			it.mappings("net.fabricmc:yarn:$minecraft_version+build.${project.deps_yarn_build}:v2")
+			it.mappings(getRootProject().file("mappings/fix.tiny"))
+		}
+	} else {
+		mappings "net.fabricmc:yarn:$minecraft_version+build.${project.deps_yarn_build}:v2"
+	}
+
 	include implementation("org.kohsuke:github-api:${project.deps_github_api}")
+
 	if(isFabric) {
 		modImplementation "net.fabricmc:fabric-loader:${project.deps_fabric_loader}"
 		modImplementation "net.fabricmc.fabric-api:fabric-api:${project.deps_fabric_api}"
@@ -79,8 +91,6 @@ stonecutter.expression(expression -> {
 })
 
 loom {
-	accessWidenerPath = file("../../src/main/resources/neruina.accesswidener")
-
 	if(isForge) {
 		forge {
 			convertAccessWideners = true
@@ -107,24 +117,25 @@ tasks.processResources {
 	def map = [
 		"version": mod_version,
 		"minecraft_version": minecraft_dependency,
-		"loader_version": loader_version,
-		"dep_type": "",
-		"mixins": ""
+		"loader_version": loader_version
 	]
-	if(isForge) {
-		map.dep_type = "mandatory = true"
-	} else if (isNeoForge) {
-		map.dep_type = "type = \"required\""
-		map.mixins = "[[mixins]]\nconfig = \"neruina.mixins.json\""
-	}
 
 	inputs.properties(map)
-	filesMatching("fabric.mod.json") {expand(map) }
-	filesMatching("META-INF/mods.toml") {expand(map) }
+	filesMatching("fabric.mod.json") { expand(map) }
+	filesMatching("META-INF/mods.toml") { expand(map) }
+	filesMatching("META-INF/neoforge.mods.toml") { expand(map) }
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = java_version
 }
 
 java {
 	withSourcesJar()
+
+	version = JavaVersion.getVersionForMajor(java_version)
+	sourceCompatibility = version
+	targetCompatibility = version
 }
 
 if(isForge && project_name.contains("1.20")) {
@@ -132,5 +143,46 @@ if(isForge && project_name.contains("1.20")) {
 		def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
 		it.output.resourcesDir = dir
 		it.java.destinationDirectory = dir
+	}
+}
+
+publishMods {
+	file = tasks.remapJar.archiveFile
+	changelog = "[Changelog](https://github.com/Bawnorton/Neruina/releases/tag/%s)".formatted(mod_version)
+	displayName = "$mod_name ${mod_loader.capitalize()} $mod_version for $minecraft_version"
+	type = BETA
+	version = mod_version
+	modLoaders.add(mod_loader)
+
+	dryRun = true
+
+	github {
+		accessToken = providers.environmentVariable("GITHUB_TOKEN")
+		repository = "Bawnorton/Neruina"
+		commitish = "stonecutter"
+		changelog = getRootProject().file("CHANGELOG.md").readLines().join("\n")
+		displayName = mod_version
+	}
+
+	modrinth {
+		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+		projectId = "1s5x833P"
+		minecraftVersions.add(minecraft_version)
+		if(isFabric) {
+			requires {
+				slug = "fabric-api"
+			}
+		}
+	}
+
+	curseforge {
+		accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+		projectId = "851046"
+		minecraftVersions.add(minecraft_version)
+		if(isFabric) {
+			requires {
+				slug = "fabric-api"
+			}
+		}
 	}
 }

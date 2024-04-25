@@ -102,7 +102,7 @@ public class NeruinaCommandHandler {
         return 1;
     }
 
-    private static int executeResumeBlockEntity(CommandContext<ServerCommandSource> context) {
+    private static int executeResumeBlockEntity(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
         BlockEntity blockEntity = context.getSource()
                 .getWorld()
@@ -126,7 +126,7 @@ public class NeruinaCommandHandler {
         return 1;
     }
 
-    private static int executeResumeBlockState(CommandContext<ServerCommandSource> context) {
+    private static int executeResumeBlockState(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
         BlockState blockState = context.getSource().getWorld().getBlockState(pos);
         String name = blockState.getBlock().getName().getString();
@@ -212,7 +212,7 @@ public class NeruinaCommandHandler {
             messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.report.not_found", UuidArgumentType.getUuid(context, "id"));
             return 0;
         }
-        Neruina.getInstance().getAutoReportHandler().createReports(entry).thenAccept(result -> {
+        Neruina.getInstance().getAutoReportHandler().createReports(context.getSource().getServer(), entry).thenAccept(result -> {
             ReportCode reportCode = result.getFirst();
             String url = result.getSecond();
             switch (reportCode) {

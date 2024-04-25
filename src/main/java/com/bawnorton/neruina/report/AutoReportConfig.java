@@ -18,16 +18,12 @@ public class AutoReportConfig {
     private String repo;
     private String title;
     private String body;
-    private List<String> labels;
-    private List<String> assignees;
 
-    public AutoReportConfig(String modid, String repo, String title, String body, List<String> labels, List<String> assignees) {
+    public AutoReportConfig(String modid, String repo, String title, String body) {
         this.modid = modid;
         this.repo = repo;
         this.title = title;
         this.body = body;
-        this.labels = labels;
-        this.assignees = assignees;
     }
 
     public boolean isVaild() {
@@ -58,14 +54,6 @@ public class AutoReportConfig {
         return body;
     }
 
-    public List<String> labels() {
-        return labels;
-    }
-
-    public List<String> assignees() {
-        return assignees;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -78,18 +66,16 @@ public class AutoReportConfig {
         return Objects.equals(this.modid, that.modid) &&
                 Objects.equals(this.repo, that.repo) &&
                 Objects.equals(this.title, that.title) &&
-                Objects.equals(this.body, that.body) &&
-                Objects.equals(this.labels, that.labels) &&
-                Objects.equals(this.assignees, that.assignees);
+                Objects.equals(this.body, that.body);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(modid, repo, title, body, labels, assignees);
+        return Objects.hash(modid, repo, title, body);
     }
 
     @Override
     public String toString() {
-        return "AutoReportConfig[modid=%s, repo=%s, title=%s, body=%s, labels=%s, assignees=%s]".formatted(modid, repo, title, body, labels, assignees);
+        return "AutoReportConfig[modid=%s, repo=%s, title=%s, body=%s]".formatted(modid, repo, title, body);
     }
 }

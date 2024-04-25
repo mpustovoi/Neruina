@@ -5,14 +5,18 @@ import com.bawnorton.neruina.handler.MessageHandler;
 import com.bawnorton.neruina.handler.PersitanceHandler;
 import com.bawnorton.neruina.handler.TickHandler;
 import com.bawnorton.neruina.report.AutoReportHandler;
-import com.mojang.serialization.Codec;
-import net.minecraft.component.DataComponentType;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+/*? if >=1.20.2 {*/
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import com.mojang.serialization.Codec;
+import net.minecraft.component.DataComponentType;
+import net.minecraft.network.codec.PacketCodecs;
+import java.util.Locale;
+/*? }*/
 
 public class Neruina {
     public static final String MOD_ID = "neruina";
@@ -25,7 +29,7 @@ public class Neruina {
     private final AutoReportHandler autoReportHandler;
 
     /*? if >=1.20.2 {*/
-    private static final DataComponentType<Boolean> ERRORED = Registry.register(Registries.DATA_COMPONENT_TYPE, MOD_ID + ":erroed", DataComponentType.<Boolean>builder().codec(Codec.BOOL).packetCodec(PacketCodecs.BOOL).build());
+    private static final DataComponentType<Boolean> ERRORED = Registry.register(Registries.DATA_COMPONENT_TYPE, MOD_ID + ":errored", DataComponentType.<Boolean>builder().codec(Codec.BOOL).packetCodec(PacketCodecs.BOOL).build());
     /*? }*/
 
     public Neruina() {

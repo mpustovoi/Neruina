@@ -23,7 +23,6 @@
   "mixins": [
     "neruina.mixins.json"
   ],
-  "accessWidener": "neruina.accesswidener",
   "depends": {
     "minecraft": "${minecraft_version}",
     "fabricloader": ">=0.15.0"
