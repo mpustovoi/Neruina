@@ -1,7 +1,7 @@
 package com.bawnorton.neruina.mixin.compat.doespotatotick;
 
 import com.bawnorton.neruina.Neruina;
-import com.bawnorton.neruina.annotation.ConditionalMixin;
+import com.bawnorton.neruina.util.annotation.ConditionalMixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;

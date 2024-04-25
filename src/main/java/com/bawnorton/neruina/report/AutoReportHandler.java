@@ -1,9 +1,7 @@
 package com.bawnorton.neruina.report;
 
 import com.bawnorton.neruina.Neruina;
-import com.bawnorton.neruina.platform.Platform;
 import com.bawnorton.neruina.thread.ThreadUtils;
-import com.bawnorton.neruina.util.Reflection;
 import com.bawnorton.neruina.util.TickingEntry;
 import com.google.gson.stream.JsonReader;
 import com.mojang.datafixers.util.Pair;
@@ -15,16 +13,8 @@ import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueBuilder;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
-import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URL;
-import java.security.CodeSource;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,14 +24,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public final class AutoReportHandler {
+    /*? if >=1.19 {*/
     private final Set<TickingEntry> reportedEntries = new HashSet<>();
     private final List<AutoReportConfig> configs = new ArrayList<>();
     private final Map<String, RepositoryReference> repositories = new HashMap<>();
     private AutoReportConfig masterConfig;
 
     public void init(MinecraftServer server) {
-        /*? if >=1.19 { */
-        Map<Identifier, Resource> neruinaAutoGhFiles = server.getResourceManager().findResources(Neruina.MOD_ID, (resource) -> resource.getPath().equals("neruina/auto_report.json"));
+        Map<Identifier, Resource> neruinaAutoGhFiles = server.getResourceManager().findResources(Neruina.MOD_ID, (resource) -> resource.getPath().equals("%s/auto_report.json".formatted(Neruina.MOD_ID)));
         for (Map.Entry<Identifier, Resource> entry : neruinaAutoGhFiles.entrySet()) {
             Identifier id = entry.getKey();
             Resource resource = entry.getValue();
@@ -54,34 +44,12 @@ public final class AutoReportHandler {
                     }
                     configs.add(config);
                 } else {
-                    Neruina.LOGGER.warn("Invalid auto report config found: {}", id);
+                    Neruina.LOGGER.warn("Invalid auto report config found: {}, ignoring", id);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
-        /*? } else { *//*
-        Collection<Identifier> neruinaAutoGhFiles = server.getResourceManager().findResources(Neruina.MOD_ID, path -> path.equals("auto_report.json"));
-        for (Identifier id : neruinaAutoGhFiles) {
-            try (Resource resource = server.getResourceManager().getResource(id)) {
-                InputStream io = resource.getInputStream();
-                JsonReader reader = new JsonReader(new InputStreamReader(io));
-                AutoReportConfig config = AutoReportConfig.fromJson(reader);
-                if (config.isVaild()) {
-                    if (config.modid().equals(Neruina.MOD_ID)) {
-                        masterConfig = config;
-                        continue;
-                    }
-                    configs.add(config);
-                } else {
-                    Neruina.LOGGER.warn("Invalid auto report config found: {}", id);
-                }
-                reader.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        *//*? }*/
     }
 
     public CompletableFuture<Pair<ReportCode, String>> createReports(MinecraftServer server, TickingEntry entry) {
@@ -91,13 +59,14 @@ public final class AutoReportHandler {
             }
 
             reportedEntries.add(entry);
-            Set<String> modids = findPotentialSources(entry);
+            Set<String> modids = entry.findPotentialSources();
             Map<String, @Nullable GHIssue> issues = new HashMap<>();
             modids.forEach(modid -> {
                 issues.put(modid, null);
                 RepositoryReference repository = repositories.computeIfAbsent(modid, key -> {
                     for (AutoReportConfig config : configs) {
-                        if (!config.modid().equals(modid)) continue;
+                        String listeningModid = config.modid();
+                        if (!listeningModid.equals("*") && !listeningModid.equals(modid)) continue;
 
                         try {
                             GHRepository ghRepository = github.getRepository(config.repo());
@@ -148,12 +117,13 @@ public final class AutoReportHandler {
         });
         if (masterRepo == null) return null;
 
-        String body = "%s".formatted(masterConfig.createIssueFormatter().getBody(tickingEntry));
+        IssueFormatter formatter = masterConfig.createIssueFormatter();
+        String body = "%s".formatted(formatter.getBody(tickingEntry));
         if (!issueMap.isEmpty()) {
             body = """
-                    Associated Issues:
+                    ## Associated Issues:
                     %s
-                            
+                    
                     %s
                     """.formatted(
                     issueMap.entrySet()
@@ -170,7 +140,6 @@ public final class AutoReportHandler {
                     body
             );
         }
-        IssueFormatter formatter = masterConfig.createIssueFormatter();
         GHIssueBuilder builder = masterRepo.createIssueBuilder(formatter.getTitle(tickingEntry)).body(body);
         try {
             return builder.create();
@@ -192,65 +161,5 @@ public final class AutoReportHandler {
             return null;
         }
     }
-
-    private Set<String> findPotentialSources(TickingEntry entry) {
-        Throwable exception = entry.error();
-        StackTraceElement[] stackTrace = exception.getStackTrace();
-        Set<String> modids = new HashSet<>();
-        for (StackTraceElement element : stackTrace) {
-            Class<?> clazz;
-            try {
-                clazz = Class.forName(element.getClassName());
-            } catch (ClassNotFoundException ignored) {
-                continue;
-            }
-
-            String methodName = element.getMethodName();
-            String modid = checkForMixin(clazz, methodName);
-            if (modid != null) {
-                modids.add(modid);
-                continue;
-            }
-
-            CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
-            if (codeSource == null) continue;
-
-            URL resource = codeSource.getLocation();
-            String modidFromResource = modidFromResource(resource);
-            if (modidFromResource != null) {
-                modids.add(modidFromResource);
-            }
-        }
-        modids.removeIf(modid -> modid.equals(Neruina.MOD_ID) || modid.equals("minecraft"));
-        return modids;
-    }
-
-    private @Nullable String checkForMixin(Class<?> clazz, String methodName) {
-        MixinMerged annotation;
-        Method method = Reflection.findMethod(clazz, methodName);
-        if (method == null) return null;
-
-        if (!method.isAnnotationPresent(MixinMerged.class)) return null;
-
-        annotation = method.getAnnotation(MixinMerged.class);
-        String mixinClassName = annotation.mixin();
-        ClassLoader classLoader = clazz.getClassLoader();
-        URL resource = classLoader.getResource(mixinClassName.replace('.', '/') + ".class");
-        if (resource == null) return null;
-
-        return modidFromResource(resource);
-    }
-
-    @Nullable
-    private static String modidFromResource(URL resource) {
-        String location = resource.getPath();
-        int index = location.indexOf("!");
-        if (index != -1) {
-            location = location.substring(0, index);
-            if (location.endsWith(".jar")) {
-                return Platform.modidFromJar(location);
-            }
-        }
-        return null;
-    }
+    /*?}*/
 }

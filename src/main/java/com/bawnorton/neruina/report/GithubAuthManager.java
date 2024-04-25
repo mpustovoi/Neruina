@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public final class GithubAuthManager {
+    /*? if >=1.19 {*/
     private static GitHub github;
     private static boolean authenticating = false;
 
@@ -177,4 +178,5 @@ public final class GithubAuthManager {
         request.setHeader("Content-Type", "application/x-www-form-urlencoded");
         return request;
     }
+    /*?}*/
 }

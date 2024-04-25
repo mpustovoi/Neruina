@@ -94,11 +94,11 @@ public abstract class EntityMixin implements Errorable {
                         messageHandler.generateResourceActions(entry)
                 );
             }
-            /*? if >=1.20 { */
+            /*? if >=1.20 { *//*
             return source != getWorld().getDamageSources().genericKill();
-            /*? } elif >=1.19 { *//*
+            *//*? } elif >=1.19 { */
             return source != getWorld().getDamageSources().outOfWorld();
-            *//*? } else { *//*
+            /*? } else { *//*
             return source != net.minecraft.entity.damage.DamageSource.OUT_OF_WORLD;
             *//*? }*/
         }

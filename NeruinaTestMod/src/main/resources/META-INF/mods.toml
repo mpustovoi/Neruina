@@ -1,0 +1,21 @@
+modLoader = "javafml"
+loaderVersion = "${loader_version}"
+issueTrackerURL = "https://github.com/Bawnorton/Neruina/issues"
+license = "MIT"
+
+[[mods]]
+modId = "neruina_test_mod"
+version = "${version}"
+displayName = "NeruinaTestMod"
+authors = "Bawnorton"
+description = '''
+Test mod for Neruina
+'''
+logoFile = "icon.png"
+
+[[dependencies.neruina_test_mod]]
+modId = "minecraft"
+mandatory = true
+versionRange = "${minecraft_version}"
+ordering = "NONE"
+side = "BOTH"

@@ -15,24 +15,24 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.UUID;
 
-/*? if >=1.20.2 {*/
+/*? if >=1.20.2 {*//*
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.ComponentMapImpl;
-/*? }*/
+*//*? }*/
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin implements Errorable {
-    /*? if >=1.20.2 {*/
+    /*? if >=1.20.2 {*//*
     @Shadow @Final
     ComponentMapImpl components;
-    /*? } else {*//*
+    *//*? } else {*/
     @Shadow public abstract NbtCompound getOrCreateNbt();
 
     @Shadow @Nullable
     public abstract NbtCompound getNbt();
 
     @Shadow public abstract boolean hasNbt();
-    *//*? }*/
+    /*? }*/
 
     @Unique
     private boolean neruina$errored = false;
@@ -63,22 +63,22 @@ public abstract class ItemStackMixin implements Errorable {
         return null;
     }
 
-    /*? if >=1.20.2 {*/
+    /*? if >=1.20.2 {*//*
     @Unique
     private void neruina$updateData() {
         ComponentChanges changes = ComponentChanges.builder()
-                .add(Neruina.getErroredComponent(), neruina$errored)
+                .add(Neruina.getInstance().getErroredComponent(), neruina$errored)
                 .build();
         components.applyChanges(changes);
     }
 
     @Inject(method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/ComponentMapImpl;)V", at = @At("TAIL"))
     private void readErroredFromComponents(ItemConvertible item, int count, ComponentMapImpl components, CallbackInfo ci) {
-        if(components.contains(Neruina.getErroredComponent())) {
-            neruina$errored = components.getOrDefault(Neruina.getErroredComponent(), false);
+        if(components.contains(Neruina.getInstance().getErroredComponent())) {
+            neruina$errored = components.getOrDefault(Neruina.getInstance().getErroredComponent(), false);
         }
     }
-    /*? } else {*//*
+    *//*? } else {*/
     @Unique
     private void neruina$updateData() {
         NbtCompound nbt = getOrCreateNbt();
@@ -99,5 +99,5 @@ public abstract class ItemStackMixin implements Errorable {
             }
         }
     }
-    *//*? }*/
+    /*? }*/
 }

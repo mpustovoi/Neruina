@@ -7,7 +7,7 @@ def project_name = loom.project.name as String
 def isFabric = project_name.contains("fabric")
 def isNeoForge = project_name.contains("neoforge")
 def isForge = project_name.contains("forge") && !isNeoForge
-def mod_loader = isFabric ? "fabric" : isForge ? "forge" : isNeoForge ? "neoforge" : null
+def mod_loader = isFabric ? "fabric" : isForge ? "forge" : isNeoForge ? "neoforge" : ""
 def java_version = project.deps_java as int
 def minecraft_version = project.deps_minecraft
 def minecraft_dependency = project.mod_minecraft_dependency
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:$minecraft_version"
+	minecraft("com.mojang:minecraft:$minecraft_version")
 
 	if(isNeoForge) {
 		mappings loom.layered {
@@ -54,24 +54,27 @@ dependencies {
 			it.mappings(getRootProject().file("mappings/fix.tiny"))
 		}
 	} else {
-		mappings "net.fabricmc:yarn:$minecraft_version+build.${project.deps_yarn_build}:v2"
+		mappings("net.fabricmc:yarn:$minecraft_version+build.${project.deps_yarn_build}:v2")
 	}
 
-	include implementation("org.kohsuke:github-api:${project.deps_github_api}")
+	implementation(include("org.kohsuke:github-api:${project.deps_github_api}"))
+	implementation(include("com.fasterxml.jackson.core:jackson-core:${project.deps_jackson}"))
+	implementation(include("com.fasterxml.jackson.core:jackson-databind:${project.deps_jackson}"))
+	implementation(include("com.fasterxml.jackson.core:jackson-annotations:${project.deps_jackson}"))
 
 	if(isFabric) {
-		modImplementation "net.fabricmc:fabric-loader:${project.deps_fabric_loader}"
-		modImplementation "net.fabricmc.fabric-api:fabric-api:${project.deps_fabric_api}"
-		implementation include("org.apache.maven:maven-artifact:3.8.1")
+		modImplementation("net.fabricmc:fabric-loader:${project.deps_fabric_loader}")
+		modImplementation("net.fabricmc.fabric-api:fabric-api:${project.deps_fabric_api}")
+		implementation(include("org.apache.maven:maven-artifact:3.8.1"))
 	} else if (isForge) {
-		forge "net.minecraftforge:forge:$minecraft_version-${project.deps_fml}"
-		annotationProcessor compileOnly("io.github.llamalad7:mixinextras-common:${project.deps_mixin_extras}")
-		include implementation("io.github.llamalad7:mixinextras-forge:${project.deps_mixin_extras}")
-		modCompileOnly "curse.maven:it-shall-not-tick-619355:${project.deps_it_shall_not_tick}"
-		modCompileOnly "curse.maven:no-see-no-tick-833405:${project.deps_no_see_no_tick}"
-		modImplementation "curse.maven:doespotatotick-825355:${project.deps_does_potato_tick}"
+		forge("net.minecraftforge:forge:$minecraft_version-${project.deps_fml}")
+		compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${project.deps_mixin_extras}"))
+		implementation(include("io.github.llamalad7:mixinextras-forge:${project.deps_mixin_extras}"))
+		modCompileOnly("curse.maven:it-shall-not-tick-619355:${project.deps_it_shall_not_tick}")
+		modCompileOnly("curse.maven:no-see-no-tick-833405:${project.deps_no_see_no_tick}")
+		modCompileOnly("curse.maven:doespotatotick-825355:${project.deps_does_potato_tick}")
 	} else if (isNeoForge) {
-		neoForge "net.neoforged:neoforge:${project.deps_neoforge}"
+		neoForge("net.neoforged:neoforge:${project.deps_neoforge}")
 	}
 }
 
@@ -83,10 +86,6 @@ stonecutter.expression(expression -> {
 			return isForge
 		case "neoforge":
 			return isNeoForge
-		case "dev":
-			return !project.gradle.startParameter.taskNames.contains("chiseledBuild")
-		default:
-			return null
 	}
 })
 
@@ -133,9 +132,9 @@ tasks.withType(JavaCompile).configureEach {
 java {
 	withSourcesJar()
 
-	version = JavaVersion.getVersionForMajor(java_version)
-	sourceCompatibility = version
-	targetCompatibility = version
+	def jv = JavaVersion.getVersionForMajor(java_version)
+	sourceCompatibility = jv
+	targetCompatibility = jv
 }
 
 if(isForge && project_name.contains("1.20")) {

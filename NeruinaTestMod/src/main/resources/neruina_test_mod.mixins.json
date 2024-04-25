@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "com.bawnorton.neruina_test_mod.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.8",
+  "mixins": [
+    "TestBlockEntityCrashMixin",
+    "TestBlockStateCrashMixin",
+    "TestEntityCrashMixin",
+    "TestItemStackCrashMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

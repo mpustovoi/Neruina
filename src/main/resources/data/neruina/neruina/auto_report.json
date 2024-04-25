@@ -1,4 +1,6 @@
 {
-  "modid": "neruina",
-  "repo": "Bawnorton/NeruinaAutoReports"
+  "modid": "*",
+  "repo": "Bawnorton/NeruinaAutoReports",
+  "body": "## Report:\n<report>",
+  "title": "Auto Report [<sources>] (<date> - <time>)"
 }

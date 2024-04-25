@@ -1,6 +1,8 @@
 package com.bawnorton.neruina.util;
 
+import com.bawnorton.neruina.Neruina;
 import com.bawnorton.neruina.extend.CrashReportSectionExtender;
+import com.bawnorton.neruina.platform.Platform;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
@@ -13,7 +15,13 @@ import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.security.CodeSource;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -26,16 +34,23 @@ public final class TickingEntry {
     private String cachedCauseType;
     private String cachedCauseName;
 
-    public TickingEntry(Supplier<@Nullable Object> causeSupplier, BlockPos pos, UUID uuid, Throwable error) {
+    public TickingEntry(Object cause, BlockPos pos, Throwable error) {
+        this.causeSupplier = () -> cause;
+        this.pos = pos;
+        this.error = error;
+
+        this.update();
+
+        long errorHash = error.getMessage().hashCode() ^ error.getClass().hashCode() ^ 0x9e324799;
+        long causeHash = getCauseName().hashCode() ^ getCauseType().hashCode() ^ pos.asLong() ^ 0x376c3fa1;
+        this.uuid = new UUID(errorHash, causeHash);
+    }
+
+    private TickingEntry(Supplier<@Nullable Object> causeSupplier, BlockPos pos, UUID uuid, Throwable error) {
         this.causeSupplier = causeSupplier;
         this.pos = pos;
         this.uuid = uuid;
         this.error = error;
-    }
-
-    public TickingEntry(Object cause, BlockPos pos, Throwable error) {
-        this(() -> cause, pos, UUID.randomUUID(), error);
-        this.update();
     }
 
     public void populate(CrashReportSection section) {
@@ -93,6 +108,68 @@ public final class TickingEntry {
 
     public String getCauseName() {
         return cachedCauseName;
+    }
+
+    public Set<String> findPotentialSources() {
+        StackTraceElement[] stackTrace = error.getStackTrace();
+        Set<String> modids = new HashSet<>();
+        for (StackTraceElement element : stackTrace) {
+            Class<?> clazz;
+            try {
+                clazz = Class.forName(element.getClassName());
+            } catch (ClassNotFoundException ignored) {
+                continue;
+            }
+
+            String methodName = element.getMethodName();
+            String modid = checkForMixin(clazz, methodName);
+            if (modid != null) {
+                modids.add(modid);
+                continue;
+            }
+
+            CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
+            if (codeSource == null) continue;
+
+            URL resource = codeSource.getLocation();
+            String modidFromResource = modidFromResource(resource);
+            if (modidFromResource != null) {
+                modids.add(modidFromResource);
+            }
+        }
+        modids.removeIf(modid -> modid.equals(Neruina.MOD_ID) || modid.equals("minecraft"));
+        return modids;
+    }
+
+    private @Nullable String checkForMixin(Class<?> clazz, String methodName) {
+        MixinMerged annotation;
+        Method method = Reflection.findMethod(clazz, methodName);
+        if (method == null) return null;
+
+        if (!method.isAnnotationPresent(MixinMerged.class)) return null;
+
+        annotation = method.getAnnotation(MixinMerged.class);
+        String mixinClassName = annotation.mixin();
+        ClassLoader classLoader = clazz.getClassLoader();
+        URL resource = classLoader.getResource(mixinClassName.replace('.', '/') + ".class");
+        if (resource == null) return null;
+
+        return modidFromResource(resource);
+    }
+
+    @Nullable
+    private static String modidFromResource(URL resource) {
+        String location = resource.getPath();
+        int index = location.indexOf("!");
+        if (index != -1) {
+            location = location.substring(0, index);
+            if (location.endsWith(".jar")) {
+                String[] parts = location.split("/");
+                String jarName = parts[parts.length - 1];
+                return Platform.modidFromJar(jarName);
+            }
+        }
+        return null;
     }
 
     public NbtCompound writeNbt() {

@@ -41,10 +41,10 @@
   "commands.neruina.kill.multiple.singular_plural": "Killed 1 errored Entity on request. %s were not errored.",
   "commands.neruina.kill.multiple.plural_singular": "Killed %s errored entities on request. 1 was not errored.",
   "commands.neruina.kill.not_errored": "Target Entity [%s] is not errored, use /kill instead.",
-  "commands.neruina.kill.not_found": "Target Entity could not be found. It may have been unloaded.",
+  "commands.neruina.kill.not_found": "Target Entity could not be found. It may have been unloaded or removed.",
   "commands.neruina.resume.entity": "Resumed ticking for Entity [%s] on request.",
   "commands.neruina.resume.entity.not_errored": "Target Entity [%s] is not errored.",
-  "commands.neruina.resume.entity.not_found": "Target Entity could not be found. It may have been unloaded.",
+  "commands.neruina.resume.entity.not_found": "Target Entity could not be found. It may have been unloaded or removed.",
   "commands.neruina.resume.block_entity": "Resumed ticking for Block Entity [%s] at (%s) on request.",
   "commands.neruina.resume.block_entity.not_found": "No Block Entity found at (%s).",
   "commands.neruina.resume.block_entity.not_errored": "Target Block Entity [%s] at (%s) is not errored.",
@@ -56,12 +56,13 @@
   "commands.neruina.report.success.tooltip": "Click here to view the issue on GitHub.",
   "commands.neruina.report.failure": "Failed to report issue, see logs for more information.",
   "commands.neruina.report.already_exists": "Issue already reported.",
+  "commands.neruina.report.not_found": "Could not create report as the associated ticking entry was not found. It may have been unloaded or removed.",
   "commands.neruina.id": "Ticking Entry ID: %s",
   "commands.neruina.id.tooltip": "Click to copy to clipboard.",
   "commands.neruina.id.entity.not_errored": "%s is not errored.",
   "commands.neruina.id.block.not_errored": "Block [%s] at (%s) is not errored.",
-  "commands.neruina.info.not_found": "No information found for ID [%s]. Use \"/neruina id\" to find the ID of a ticking entry.",
   "commands.neruina.info.entity": "Entity [%s] at (%s) is suspended.",
   "commands.neruina.info.block_entity": "Block [%s] at (%s) is suspended.",
-  "commands.neruina.info.null_cause": "%s at (%s) is suspended, but could not be found, it has likely been unloaded."
+  "commands.neruina.info.null_cause": "%s at (%s) is suspended, but could not be found. It may have been unloaded or removed.",
+  "commands.neruina.info.not_found": "Could not get information about the specified ticking entry. It may have been unloaded or removed."
 }

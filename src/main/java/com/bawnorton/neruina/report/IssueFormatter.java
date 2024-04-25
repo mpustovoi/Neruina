@@ -8,14 +8,20 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class IssueFormatter {
+    /*? if >=1.19 {*/
     private static final List<Placeholder> PLACEHOLDERS = List.of(
             new Placeholder("date", true, Restriction.NONE, (config, entry) -> DateFormat.getDateInstance(DateFormat.MEDIUM).format(new Date())),
             new Placeholder("time", true, Restriction.NONE, (config, entry) -> DateFormat.getTimeInstance(DateFormat.MEDIUM).format(new Date())),
             new Placeholder("modid", true, Restriction.NONE, (config, entry) -> config.modid()),
+            new Placeholder("sources", false, Restriction.NONE, (config, entry) -> {
+                Set<String> sources = entry.findPotentialSources();
+                return sources.isEmpty() ? "unknown" : String.join(", ", sources);
+            }),
             new Placeholder("type", true, Restriction.NONE, (config, entry) -> entry.getCauseType()),
             new Placeholder("name", true, Restriction.NONE, (config, entry) -> entry.getCauseName()),
             new Placeholder("modloader", true, Restriction.NONE, (config, entry) -> Platform.getModLoader().name().toLowerCase(Locale.ROOT)),
@@ -26,11 +32,23 @@ public class IssueFormatter {
 
     private static final String DEFAULT_TITLE = "[Neruina]: Ticking Exception Auto Report (<date> - <time>)";
     private static final String DEFAULT_BODY = """
-        ### Automatic Report Created by **NeruinaAutoReporter**
+        ## Automatic Report Created by **NeruinaAutoReporter**
         Neruina detected a ticking exception in "<modid>" (<type>: <name>)
+        
+        ### Environment:
+        - Minecraft Version: <mcversion>
+        - Mod Loader: <modloader>
+        - Mod Version: <modversion>
             
-        Generated Report:
+        ## Report:
+        <details>
+        <summary>Generated Crash Report</summary>
+        
         <report>
+        
+        </details>
+        
+        This issue was created automatically by Neruina's AutoReporter. To opt-out of this feature, remove the neruina/auto_report.json file from your mod's data resources.
         """;
 
     private final AutoReportConfig config;
@@ -119,4 +137,5 @@ public class IssueFormatter {
     private interface Applier {
         String apply(AutoReportConfig config, TickingEntry entry);
     }
+    /*?}*/
 }

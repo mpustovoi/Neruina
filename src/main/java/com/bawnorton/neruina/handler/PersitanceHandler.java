@@ -23,32 +23,32 @@ public final class PersitanceHandler extends PersistentState {
     private static ServerWorld world;
     private static final TickHandler tickHandler = Neruina.getInstance().getTickHandler();
 
-    /*? if >=1.20.2 {*/
+    /*? if >=1.20.2 {*//*
     private static final Type<PersitanceHandler> type = new Type<>(
             PersitanceHandler::new,
             PersitanceHandler::fromNbt,
             null
     );
-    /*? } */
+    *//*? } */
 
     public static PersitanceHandler getServerState(MinecraftServer server) {
         world = server.getWorld(World.OVERWORLD);
         assert world != null;
         PersistentStateManager manager = world.getPersistentStateManager();
-        /*? if >=1.20.2 {*/
+        /*? if >=1.20.2 {*//*
         PersitanceHandler handler = manager.getOrCreate(type, Neruina.MOD_ID);
-        /*? } else {*//*
+        *//*? } else {*/
         PersitanceHandler handler = manager.getOrCreate(PersitanceHandler::fromNbtInternal, PersitanceHandler::new, Neruina.MOD_ID);
-        *//*? }*/
+        /*? }*/
         handler.markDirty();
         return handler;
     }
 
-    /*? if >=1.20.2 {*/
+    /*? if >=1.20.2 {*//*
     private static PersitanceHandler fromNbt(NbtCompound nbt, net.minecraft.registry.RegistryWrapper.WrapperLookup registryLookup) {
         return fromNbtInternal(nbt);
     }
-    /*? } */
+    *//*? } */
 
     private static PersitanceHandler fromNbt(NbtCompound nbt) {
         return fromNbtInternal(nbt);
@@ -76,7 +76,7 @@ public final class PersitanceHandler extends PersistentState {
                     VersionedText.translatable("neruina.ticking_entries.entry", entry.getCauseName(), messageHandler.posAsNums(entry.pos())),
                     style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/neruina info " + entry.uuid()))
                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, VersionedText.translatable("neruina.ticking_entries.entry.tooltip")))
-                            .withColor(Formatting.RED)
+                            .withColor(Formatting.DARK_RED)
             )));
             tickingEntryMessages.add(messageHandler.generateInfoAction());
             messageHandler.broadcastToPlayers(server, VersionedText.concatDelimited(VersionedText.LINE_BREAK, tickingEntryMessages.toArray(new Text[0])));
@@ -84,11 +84,11 @@ public final class PersitanceHandler extends PersistentState {
         return handler;
     }
 
-    /*? if >=1.20.2 {*/
+    /*? if >=1.20.2 {*//*
     public NbtCompound writeNbt(NbtCompound nbt, net.minecraft.registry.RegistryWrapper.WrapperLookup registryLookup) {
         return writeNbtInternal(nbt);
     }
-    /*? } */
+    *//*? } */
 
     public NbtCompound writeNbt(NbtCompound nbt) {
         return writeNbtInternal(nbt);

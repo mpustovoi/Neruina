@@ -92,8 +92,9 @@ public final class MessageHandler {
                                         HoverEvent.Action.SHOW_TEXT,
                                         VersionedText.translatable("neruina.copy_crash.tooltip")
                                 ))
-                )),
-                Texts.bracketed(VersionedText.withStyle(
+                ))
+                /*? if >=1.19 {*/
+                ,Texts.bracketed(VersionedText.withStyle(
                         VersionedText.translatable("neruina.report"),
                         style -> style.withColor(Formatting.LIGHT_PURPLE)
                                 .withClickEvent(new ClickEvent(
@@ -105,6 +106,7 @@ public final class MessageHandler {
                                         VersionedText.translatable("neruina.report.tooltip")
                                 ))
                 ))
+                /*?}*/
         );
     }
 
@@ -171,10 +173,6 @@ public final class MessageHandler {
                 VersionedText.format(message),
                 actions != null ? VersionedText.concatDelimited(VersionedText.LINE_BREAK, actions) : null
         )), false);
-    }
-
-    public void sendFormattedMessage(Consumer<Text> sender, String key, Object... args) {
-        sender.accept(formatText(key, args));
     }
 
     public Text formatText(String key, Object... args) {

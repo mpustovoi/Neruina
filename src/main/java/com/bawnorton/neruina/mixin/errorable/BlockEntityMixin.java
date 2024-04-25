@@ -1,7 +1,6 @@
 package com.bawnorton.neruina.mixin.errorable;
 
 import com.bawnorton.neruina.extend.Errorable;
-import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,7 +44,11 @@ public abstract class BlockEntityMixin implements Errorable {
     }
 
     @Inject(method = "writeNbt", at = @At("HEAD"))
-    private void writeErroredToNbt(CallbackInfo ci, @Local(argsOnly = true) NbtCompound nbt) {
+    /*? if >=1.20.2 {*//*
+    private void writeErroredToNbt(NbtCompound nbt, net.minecraft.registry.RegistryWrapper.WrapperLookup registryLookup, CallbackInfo ci) {
+    *//*? } else {*/
+    private void writeErroredToNbt(NbtCompound nbt, CallbackInfo ci) {
+    /*?}*/
         if (neruina$errored) {
             nbt.putBoolean("neruina$errored", true);
         }
@@ -55,7 +58,11 @@ public abstract class BlockEntityMixin implements Errorable {
     }
 
     @Inject(method = "readNbt", at = @At("TAIL"))
-    private void readErroredFromNbt(CallbackInfo ci, @Local(argsOnly = true) NbtCompound nbt) {
+    /*? if >=1.20.2 {*//*
+    private void readErroredFromNbt(NbtCompound nbt, net.minecraft.registry.RegistryWrapper.WrapperLookup registryLookup, CallbackInfo ci) {
+    *//*? } else {*/
+    private void readErroredFromNbt(NbtCompound nbt, CallbackInfo ci) {
+    /*?}*/
         if (nbt.contains("neruina$errored")) {
             neruina$errored = nbt.getBoolean("neruina$errored");
         }

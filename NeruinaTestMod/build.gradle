@@ -1,0 +1,141 @@
+plugins {
+	id 'dev.architectury.loom' version "1.6-SNAPSHOT"
+	id 'me.modmuss50.mod-publish-plugin' version "0.4.+"
+}
+
+def project_name = loom.project.name as String
+def isFabric = project_name.contains("fabric")
+def isNeoForge = project_name.contains("neoforge")
+def isForge = project_name.contains("forge") && !isNeoForge
+def mod_loader = isFabric ? "fabric" : isForge ? "forge" : isNeoForge ? "neoforge" : null
+def java_version = project.deps_java as int
+def minecraft_version = project.deps_minecraft
+def minecraft_dependency = project.mod_minecraft_dependency
+def loader_version = isForge ? project.deps_fml : isNeoForge ? project.deps_neoforge : project.deps_fabric_loader
+def mod_id = project.mod_id
+def mod_name = project.mod_name
+def mod_version = project.mod_version
+def mod_group = project.mod_group
+
+version = "$mod_version+$minecraft_version"
+group = mod_group
+
+base {
+	archivesName = "$mod_id-$mod_loader"
+}
+
+repositories {
+	exclusiveContent {
+		forRepository { maven { url = "https://www.cursemaven.com" } }
+		filter { includeGroup("curse.maven") }
+	}
+	exclusiveContent {
+		forRepository { maven { url = "https://api.modrinth.com/maven" } }
+		filter { includeGroup("maven.modrinth") }
+	}
+	maven { url = "https://jitpack.io" }
+	maven { url = "https://maven.terraformersmc.com/releases/" }
+	maven { url = "https://maven.isxander.dev/releases" }
+	maven { url = "https://maven.shedaniel.me/" }
+	maven { url = "https://maven.quiltmc.org/repository/release/" }
+	maven { url = "https://oss.sonatype.org/content/repositories/snapshots" }
+	maven { url = "https://maven.kikugie.dev/releases" }
+	maven { url = "https://maven.neoforged.net/releases/" }
+	mavenLocal()
+	mavenCentral()
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:$minecraft_version"
+
+	if(isNeoForge) {
+		mappings loom.layered {
+			it.mappings("net.fabricmc:yarn:$minecraft_version+build.${project.deps_yarn_build}:v2")
+			it.mappings(getRootProject().file("mappings/fix.tiny"))
+		}
+	} else {
+		mappings "net.fabricmc:yarn:$minecraft_version+build.${project.deps_yarn_build}:v2"
+	}
+
+	if(isFabric) {
+		modImplementation "net.fabricmc:fabric-loader:${project.deps_fabric_loader}"
+		modImplementation "net.fabricmc.fabric-api:fabric-api:${project.deps_fabric_api}"
+	} else if (isForge) {
+		forge "net.minecraftforge:forge:$minecraft_version-${project.deps_fml}"
+		annotationProcessor compileOnly("io.github.llamalad7:mixinextras-common:${project.deps_mixin_extras}")
+		include implementation("io.github.llamalad7:mixinextras-forge:${project.deps_mixin_extras}")
+	} else if (isNeoForge) {
+		neoForge "net.neoforged:neoforge:${project.deps_neoforge}"
+	}
+}
+
+stonecutter.expression(expression -> {
+	switch (expression) {
+		case "fabric":
+			return isFabric
+		case "forge":
+			return isForge
+		case "neoforge":
+			return isNeoForge
+		case "dev":
+			return !project.gradle.startParameter.taskNames.contains("chiseledBuild")
+		default:
+			return null
+	}
+})
+
+loom {
+	if(isForge) {
+		forge {
+			convertAccessWideners = true
+			mixinConfigs("${mod_id}.mixins.json")
+		}
+	}
+
+	runConfigs {
+		client {
+			ideConfigGenerated = true
+			runDir = "../../run"
+		}
+	}
+}
+
+if (stonecutter.current.active) {
+	rootProject.tasks.register("buildActive") {
+		group = "project"
+		dependsOn(tasks.named("build"))
+	}
+}
+
+tasks.processResources {
+	def map = [
+		"version": mod_version,
+		"minecraft_version": minecraft_dependency,
+		"loader_version": loader_version
+	]
+
+	inputs.properties(map)
+	filesMatching("fabric.mod.json") { expand(map) }
+	filesMatching("META-INF/mods.toml") { expand(map) }
+	filesMatching("META-INF/neoforge.mods.toml") { expand(map) }
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = java_version
+}
+
+java {
+	withSourcesJar()
+
+	def jv = JavaVersion.getVersionForMajor(java_version)
+	sourceCompatibility = jv
+	targetCompatibility = jv
+}
+
+if(isForge && project_name.contains("1.20")) {
+	sourceSets.each {
+		def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+		it.output.resourcesDir = dir
+		it.java.destinationDirectory = dir
+	}
+}

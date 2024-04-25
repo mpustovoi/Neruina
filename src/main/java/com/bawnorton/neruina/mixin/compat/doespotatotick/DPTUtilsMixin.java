@@ -2,7 +2,7 @@ package com.bawnorton.neruina.mixin.compat.doespotatotick;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
-import com.bawnorton.neruina.annotation.ConditionalMixin;
+import com.bawnorton.neruina.util.annotation.ConditionalMixin;
 
 /*? if <1.19 { *//*
 import com.llamalad7.mixinextras.sugar.Local;

@@ -1,4 +1,4 @@
-package com.bawnorton.neruina.annotation;
+package com.bawnorton.neruina.util.annotation;
 
 public @interface Version {
     String min() default "";

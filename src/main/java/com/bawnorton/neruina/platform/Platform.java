@@ -3,8 +3,12 @@ package com.bawnorton.neruina.platform;
 import java.nio.file.Path;
 
 /*? if fabric {*/
+import com.bawnorton.neruina.Neruina;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.fabricmc.loader.api.metadata.ModOrigin;
+
 public final class Platform {
     public static Path getConfigDir() {
         return FabricLoader.getInstance().getConfigDir();
@@ -14,19 +18,27 @@ public final class Platform {
         return FabricLoader.getInstance().isModLoaded(modid);
     }
 
-    public static boolean isDev() {
-        return FabricLoader.getInstance().isDevelopmentEnvironment();
-    }
-
     public static ModLoader getModLoader() {
         return ModLoader.FABRIC;
     }
 
     public static String modidFromJar(String jarName) {
         for (ModContainer modContainer : FabricLoader.getInstance().getAllMods()) {
-            for (Path path : modContainer.getOrigin().getPaths()) {
-                if (path.endsWith(jarName)) {
-                    return modContainer.getMetadata().getId();
+            ModMetadata metadata = modContainer.getMetadata();
+            ModOrigin origin = modContainer.getOrigin();
+            switch (origin.getKind()) {
+                case PATH -> {
+                    for (Path path : origin.getPaths()) {
+                        if (path.endsWith(jarName)) {
+                            return metadata.getId();
+                        }
+                    }
+                }
+                case NESTED -> {
+                    String parentLocation = origin.getParentSubLocation();
+                    if (parentLocation != null && parentLocation.endsWith(jarName)) {
+                        return metadata.getId();
+                    }
                 }
             }
         }
@@ -63,10 +75,6 @@ public final class Platform {
             }
         }
         return false;
-    }
-
-    public static boolean isDev() {
-        return !FMLLoader.isProduction();
     }
 
     public static ModLoader getModLoader() {
@@ -111,10 +119,6 @@ public final class Platform {
             }
         }
         return false;
-    }
-
-    public static boolean isDev() {
-        return !FMLLoader.isProduction();
     }
 
     public static ModLoader getModLoader() {

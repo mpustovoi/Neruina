@@ -64,11 +64,13 @@ public class NeruinaCommandHandler {
                                 .executes(NeruinaCommandHandler::executeKill)
                         )
                 )
+                /*? if >=1.19 {*/
                 .then(CommandManager.literal("report")
                         .then(CommandManager.argument("id", UuidArgumentType.uuid())
                                 .executes(NeruinaCommandHandler::executeReport)
                         )
                 )
+                /*?}*/
                 .then(CommandManager.literal("id")
                         .then(CommandManager.argument("entity", EntityArgumentType.entity())
                                 .executes(NeruinaCommandHandler::executeIdEntity)
@@ -89,15 +91,13 @@ public class NeruinaCommandHandler {
         try {
             Entity entity = EntityArgumentType.getEntity(context, "entity");
             if (!((Errorable) entity).neruina$isErrored()) {
-                messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.resume.entity.not_errored", entity.getName()
-                        .getString());
+                context.getSource().sendError(messageHandler.formatText("commands.neruina.resume.entity.not_errored", entity.getName().getString()));
                 return 0;
             }
             Neruina.getInstance().getTickHandler().removeErrored(entity);
-            messageHandler.broadcastToPlayers(context, "commands.neruina.resume.entity", entity.getName()
-                    .getString());
+            messageHandler.broadcastToPlayers(context, "commands.neruina.resume.entity", entity.getName().getString());
         } catch (CommandSyntaxException ignored) {
-            messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.resume.entity.not_found");
+            context.getSource().sendError(messageHandler.formatText("commands.neruina.resume.entity.not_found"));
         }
         return 1;
     }
@@ -108,7 +108,7 @@ public class NeruinaCommandHandler {
                 .getWorld()
                 .getBlockEntity(pos);
         if (blockEntity == null) {
-            messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.resume.block_entity.not_found", messageHandler.posAsNums(pos));
+            context.getSource().sendError(messageHandler.formatText("commands.neruina.resume.block_entity.not_found", messageHandler.posAsNums(pos)));
             return 0;
         }
         World world = context.getSource().getWorld();
@@ -117,7 +117,7 @@ public class NeruinaCommandHandler {
         Block block = state.getBlock();
         String name = block.getName().getString();
         if (!((Errorable) blockEntity).neruina$isErrored()) {
-            messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.resume.block_entity.not_errored", name, messageHandler.posAsNums(pos));
+            context.getSource().sendError(messageHandler.formatText("commands.neruina.resume.block_entity.not_errored", name, messageHandler.posAsNums(pos)));
             return 0;
         }
         Neruina.getInstance().getTickHandler().removeErrored(blockEntity);
@@ -131,7 +131,7 @@ public class NeruinaCommandHandler {
         BlockState blockState = context.getSource().getWorld().getBlockState(pos);
         String name = blockState.getBlock().getName().getString();
         if (!((ErrorableBlockState) blockState).neruina$isErrored(pos)) {
-            messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.resume.block_state.not_errored", name, messageHandler.posAsNums(pos));
+            context.getSource().sendError(messageHandler.formatText("commands.neruina.resume.block_state.not_errored", name, messageHandler.posAsNums(pos)));
             return 0;
         }
         Neruina.getInstance().getTickHandler().removeErrored(blockState, pos);
@@ -144,18 +144,18 @@ public class NeruinaCommandHandler {
             PlayerEntity player = EntityArgumentType.getPlayer(context, "player");
             ItemStack stack = player.getStackInHand(player.getActiveHand());
             if(!((Errorable) (Object) stack).neruina$isErrored()) {
-                messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.resume.item_stack.not_errored", player.getName().getString(), stack.getName().getString());
+                context.getSource().sendError(messageHandler.formatText("commands.neruina.resume.item_stack.not_errored", player.getName().getString(), stack.getName().getString()));
                 return 0;
             }
             Neruina.getInstance().getTickHandler().removeErrored(stack);
             context.getSource().sendFeedback(
                     /*? if >=1.20 */
-                    () ->
+                    /*() ->*/
                     messageHandler.formatText("commands.neruina.resume.item_stack", player.getName().getString(), stack.getName().getString()),
                     false
             );
         } catch (CommandSyntaxException ignored) {
-            messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.resume.entity.not_found");
+            context.getSource().sendError(messageHandler.formatText("commands.neruina.resume.entity.not_found"));
         }
         return 1;
     }
@@ -167,7 +167,7 @@ public class NeruinaCommandHandler {
                 Entity entity = entities.iterator().next();
                 String name = entity.getName().getString();
                 if (!((Errorable) entity).neruina$isErrored()) {
-                    messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.kill.not_errored", name);
+                    context.getSource().sendError(messageHandler.formatText("commands.neruina.kill.not_errored", name));
                     return 0;
                 }
                 Neruina.getInstance().getTickHandler().killEntity(entity, messageHandler.formatText("commands.neruina.kill", name));
@@ -186,7 +186,7 @@ public class NeruinaCommandHandler {
                         .getServer(), message);
             }
         } catch (CommandSyntaxException ignored) {
-            messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.kill.not_found");
+            context.getSource().sendError(messageHandler.formatText("commands.neruina.kill.not_found"));
         }
         return 1;
     }
@@ -206,10 +206,12 @@ public class NeruinaCommandHandler {
         return message;
     }
 
+    /*? if >=1.19 {*/
     private static int executeReport(CommandContext<ServerCommandSource> context) {
-        TickingEntry entry = Neruina.getInstance().getTickHandler().getTickingEntry(UuidArgumentType.getUuid(context, "id"));
+        UUID id = UuidArgumentType.getUuid(context, "id");
+        TickingEntry entry = Neruina.getInstance().getTickHandler().getTickingEntry(id);
         if (entry == null) {
-            messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.report.not_found", UuidArgumentType.getUuid(context, "id"));
+            context.getSource().sendError(messageHandler.formatText("commands.neruina.report.not_found", id.toString()));
             return 0;
         }
         Neruina.getInstance().getAutoReportHandler().createReports(context.getSource().getServer(), entry).thenAccept(result -> {
@@ -225,22 +227,23 @@ public class NeruinaCommandHandler {
                         ))
                 );
                 case ALREADY_EXISTS ->
-                        messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.report.already_exists");
+                        context.getSource().sendError(messageHandler.formatText("commands.neruina.report.already_exists"));
                 case FAILURE ->
-                        messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.report.failure");
+                        context.getSource().sendError(messageHandler.formatText("commands.neruina.report.failure"));
             }
         });
         return 1;
     }
+    /*?}*/
 
     private static int executeIdBlock(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
         BlockEntity blockEntity = context.getSource().getWorld().getBlockEntity(pos);
         Neruina.getInstance().getTickHandler().getTickingEntryId(blockEntity).ifPresentOrElse(uuid -> context.getSource().sendFeedback(
                 /*? if >=1.20 */
-                () -> 
+                /*() ->*/ 
                 VersionedText.withStyle(
-                        messageHandler.formatText("commands.neruina.id", uuid),
+                        messageHandler.formatText("commands.neruina.id", uuid.toString()),
                         style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()))
                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, VersionedText.translatable("commands.neruina.id.tooltip")))
                 ),
@@ -259,9 +262,9 @@ public class NeruinaCommandHandler {
         Entity entity = EntityArgumentType.getEntity(context, "entity");
         Neruina.getInstance().getTickHandler().getTickingEntryId(entity).ifPresentOrElse(uuid -> context.getSource().sendFeedback(
                 /*? if >=1.20 */
-                () -> 
+                /*() ->*/ 
                 VersionedText.withStyle(
-                        messageHandler.formatText("commands.neruina.id", uuid),
+                        messageHandler.formatText("commands.neruina.id", uuid.toString()),
                         style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()))
                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, VersionedText.translatable("commands.neruina.id.tooltip")))
                 ),
@@ -279,14 +282,14 @@ public class NeruinaCommandHandler {
         UUID id = UuidArgumentType.getUuid(context, "id");
         TickingEntry entry = Neruina.getInstance().getTickHandler().getTickingEntry(id);
         if (entry == null) {
-            messageHandler.sendFormattedMessage(context.getSource()::sendError, "commands.neruina.info.not_found", id);
+            context.getSource().sendError(messageHandler.formatText("commands.neruina.info.not_found", id.toString()));
             return 0;
         }
         Object cause = entry.getCause();
         if (cause == null) {
             context.getSource().sendFeedback(
                     /*? if >=1.20 */
-                    () -> 
+                    /*() ->*/ 
                     VersionedText.pad(
                             VersionedText.concatDelimited(
                                     VersionedText.LINE_BREAK,
@@ -300,7 +303,7 @@ public class NeruinaCommandHandler {
         } else if (cause instanceof Entity entity) {
             context.getSource().sendFeedback(
                     /*? if >=1.20 */
-                    () -> 
+                    /*() ->*/ 
                     VersionedText.pad(
                             VersionedText.concatDelimited(
                                     VersionedText.LINE_BREAK,
@@ -314,7 +317,7 @@ public class NeruinaCommandHandler {
         } else if (cause instanceof BlockEntity) {
             context.getSource().sendFeedback(
                     /*? if >=1.20 */
-                    () -> 
+                    /*() ->*/ 
                     VersionedText.pad(
                             VersionedText.concatDelimited(
                                     VersionedText.LINE_BREAK,

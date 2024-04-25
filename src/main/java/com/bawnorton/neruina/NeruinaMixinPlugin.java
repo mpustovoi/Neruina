@@ -1,11 +1,11 @@
 package com.bawnorton.neruina;
 
-import com.bawnorton.neruina.annotation.ConditionalMixin;
-import com.bawnorton.neruina.annotation.DevOnlyMixin;
-import com.bawnorton.neruina.annotation.ModLoaderMixin;
-import com.bawnorton.neruina.annotation.Version;
+import com.bawnorton.neruina.util.annotation.ConditionalMixin;
+import com.bawnorton.neruina.util.annotation.ModLoaderMixin;
+import com.bawnorton.neruina.util.annotation.Version;
 import com.bawnorton.neruina.platform.ModLoader;
 import com.bawnorton.neruina.platform.Platform;
+import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
@@ -34,6 +34,7 @@ public class NeruinaMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
+        MixinExtrasBootstrap.init();
     }
 
     @Override
@@ -93,11 +94,6 @@ public class NeruinaMixinPlugin implements IMixinConfigPlugin {
                                 Platform.getModLoader()
                         ));
                     }
-                } else if (node.desc.equals(Type.getDescriptor(DevOnlyMixin.class))) {
-                    shouldApply = Platform.isDev();
-                    LOGGER.debug("%s is %sbeing applied because we are in a dev environment".formatted(className,
-                            shouldApply ? "" : "not "
-                    ));
                 }
             }
             return shouldApply;

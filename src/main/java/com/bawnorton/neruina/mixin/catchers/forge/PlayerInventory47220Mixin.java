@@ -1,8 +1,8 @@
 package com.bawnorton.neruina.mixin.catchers.forge;
 
 import com.bawnorton.neruina.Neruina;
-import com.bawnorton.neruina.annotation.ModLoaderMixin;
-import com.bawnorton.neruina.annotation.Version;
+import com.bawnorton.neruina.util.annotation.ModLoaderMixin;
+import com.bawnorton.neruina.util.annotation.Version;
 import com.bawnorton.neruina.platform.ModLoader;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
