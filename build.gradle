@@ -51,7 +51,7 @@ dependencies {
 	if(isNeoForge) {
 		mappings loom.layered {
 			it.mappings("net.fabricmc:yarn:$minecraft_version+build.${project.deps_yarn_build}:v2")
-			it.mappings(getRootProject().file("mappings/fix.tiny"))
+			it.mappings("dev.architectury:yarn-mappings-patch-neoforge:1.20.5+build.3")
 		}
 	} else {
 		mappings("net.fabricmc:yarn:$minecraft_version+build.${project.deps_yarn_build}:v2")
@@ -149,7 +149,7 @@ publishMods {
 	file = tasks.remapJar.archiveFile
 	changelog = "[Changelog](https://github.com/Bawnorton/Neruina/releases/tag/%s)".formatted(mod_version)
 	displayName = "$mod_name ${mod_loader.capitalize()} $mod_version for $minecraft_version"
-	type = BETA
+	type = STABLE
 	version = mod_version
 	modLoaders.add(mod_loader)
 
@@ -160,7 +160,7 @@ publishMods {
 		repository = "Bawnorton/Neruina"
 		commitish = "stonecutter"
 		changelog = getRootProject().file("CHANGELOG.md").readLines().join("\n")
-		displayName = mod_version
+		tagName = "$mod_loader-$mod_version+$minecraft_version"
 	}
 
 	modrinth {

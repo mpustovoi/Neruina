@@ -60,27 +60,6 @@ public final class PersitanceHandler extends PersistentState {
         for (int i = 0; i < tickingEntries.size(); i++) {
             tickHandler.addTickingEntry(TickingEntry.fromNbt(world, tickingEntries.getCompound(i)));
         }
-        List<Text> tickingEntryMessages = new ArrayList<>();
-        int count = tickHandler.getTickingEntries().size();
-        if(count == 0) return handler;
-
-        if(count == 1) {
-            tickingEntryMessages.add(VersionedText.format(VersionedText.translatable("neruina.ticking_entries.count.single")));
-        } else {
-            tickingEntryMessages.add(VersionedText.format(VersionedText.translatable("neruina.ticking_entries.count", count)));
-        }
-        MinecraftServer server = world.getServer();
-        MessageHandler messageHandler = Neruina.getInstance().getMessageHandler();
-        ConditionalRunnable.create(() -> server.execute(() -> {
-            tickHandler.getTickingEntries().forEach(entry -> tickingEntryMessages.add(VersionedText.withStyle(
-                    VersionedText.translatable("neruina.ticking_entries.entry", entry.getCauseName(), messageHandler.posAsNums(entry.pos())),
-                    style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/neruina info " + entry.uuid()))
-                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, VersionedText.translatable("neruina.ticking_entries.entry.tooltip")))
-                            .withColor(Formatting.DARK_RED)
-            )));
-            tickingEntryMessages.add(messageHandler.generateInfoAction());
-            messageHandler.broadcastToPlayers(server, VersionedText.concatDelimited(VersionedText.LINE_BREAK, tickingEntryMessages.toArray(new Text[0])));
-        }), () -> world.getChunkManager().getLoadedChunkCount() >= 9);
         return handler;
     }
 
@@ -96,7 +75,7 @@ public final class PersitanceHandler extends PersistentState {
 
     private NbtCompound writeNbtInternal(NbtCompound nbt) {
         NbtList tickingEntries = new NbtList();
-        tickHandler.getTickingEntries().forEach(entry -> tickingEntries.add(entry.writeNbt()));
+        tickHandler.getTickingEntries().stream().filter(TickingEntry::isPersitent).forEach(entry -> tickingEntries.add(entry.writeNbt()));
         nbt.put("tickingEntries", tickingEntries);
         return nbt;
     }

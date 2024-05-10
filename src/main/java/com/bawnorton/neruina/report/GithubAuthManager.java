@@ -6,8 +6,14 @@
 package com.bawnorton.neruina.report;
 
 import com.bawnorton.neruina.Neruina;
+import com.bawnorton.neruina.exception.AbortedException;
+import com.bawnorton.neruina.exception.InProgressException;
+import com.bawnorton.neruina.handler.MessageHandler;
+import com.bawnorton.neruina.thread.AbortableCountDownLatch;
+import com.bawnorton.neruina.version.VersionedText;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.Util;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -22,58 +28,83 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.kohsuke.github.GitHub;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public final class GithubAuthManager {
     /*? if >=1.19 {*/
-    private static GitHub github;
-    private static boolean authenticating = false;
-
     private static final String CLIENT_ID = "1907e7c3f988a98face9";
     private static final String GITHUB_AUTH_URL = "https://github.com/login/oauth/authorize";
     private static final String GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token";
 
     private static final int PORT = 25595;
 
-    public static CompletableFuture<GitHub> getOrLogin() {
-        if(github != null) {
-            return CompletableFuture.completedFuture(github);
-        }
-        CountDownLatch latch = new CountDownLatch(1);
-        if(authenticating) {
-            return CompletableFuture.supplyAsync(() -> {
-                try {
-                    latch.await();
-                    return github;
-                } catch (InterruptedException e) {
-                    throw new CancellationException("Interrupted");
-                }
-            });
+    private static final Map<UUID, LoginRecord> logins = new HashMap<>();
+
+    public static boolean cancelLogin(ServerPlayerEntity player) {
+        LoginRecord record = logins.get(player.getUuid());
+        if(record == null || !record.inProgress) {
+            return false;
         }
 
-        authenticating = true;
+        record.authLatch.abort();
+        return true;
+    }
+
+    public static CompletableFuture<GitHub> getOrLogin(ServerPlayerEntity player) {
+        MessageHandler messageHandler = Neruina.getInstance().getMessageHandler();
+        LoginRecord record = logins.computeIfAbsent(player.getUuid(), uuid -> new LoginRecord());
+        if (record.gitHub != null) {
+            messageHandler.sendToPlayer(player,
+                    VersionedText.translatable("commands.neruina.report.reporting"),
+                    false
+            );
+
+            return CompletableFuture.completedFuture(record.gitHub);
+        }
+
+        if(record.inProgress) {
+            return CompletableFuture.failedFuture(new InProgressException("Login already in progress"));
+        }
+
+        messageHandler.sendToPlayer(player,
+                VersionedText.translatable("commands.neruina.report.processing"),
+                false,
+                messageHandler.generateCancelLoginAction()
+        );
+
+        record.inProgress = true;
+        record.authLatch = new AbortableCountDownLatch(1);
+        record.loginLatch = new CountDownLatch(1);
+
         return CompletableFuture.supplyAsync(() -> {
             try {
                 Neruina.LOGGER.info("Logging into GitHub...");
-                return getAuthorisationCode();
+                return getAuthorisationCode(record);
             } catch (Exception e) {
                 Neruina.LOGGER.error("Failed to login to GitHub");
                 throw new CompletionException(e);
             }
         }).thenApply(code -> {
+            if(code == null) {
+                throw new CancellationException("Authentication timed out");
+            }
             try {
                 Neruina.LOGGER.info("Getting OAuth token...");
                 return getOAuthToken(code);
@@ -84,24 +115,29 @@ public final class GithubAuthManager {
         }).thenApply(oauthCode -> {
             try {
                 Neruina.LOGGER.info("Authenticating with GitHub...");
-                github = GitHub.connectUsingOAuth(oauthCode);
-                Neruina.LOGGER.info("Successfully Logged into GitHub as {}", github.getMyself().getLogin());
-                return github;
+                record.gitHub = GitHub.connectUsingOAuth(oauthCode);
+                Neruina.LOGGER.info("Successfully Logged into GitHub as {}", record.gitHub.getMyself().getLogin());
+
+                messageHandler.sendToPlayer(player,
+                        VersionedText.translatable("commands.neruina.report.authenticated"),
+                        false
+                );
+
+                return record.gitHub;
             } catch (IOException e) {
-                Neruina.LOGGER.error("Failed to login to GitHub");
+                Neruina.LOGGER.error("Failed to authenticate with GitHub");
                 throw new CompletionException(e);
             }
         }).whenComplete((a, b) -> {
-            authenticating = false;
-            latch.countDown();
+            record.inProgress = false;
+            record.loginLatch.countDown();
         });
     }
 
-    private static String getAuthorisationCode() throws IOException {
+    private static String getAuthorisationCode(LoginRecord record) throws IOException, AbortedException {
         String state = RandomStringUtils.randomAlphabetic(8);
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
 
-        CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<String> code = new AtomicReference<>();
         server.createContext("/github/callback", exchange -> {
             Map<String, String> query = URLEncodedUtils.parse(exchange.getRequestURI(), StandardCharsets.UTF_8)
@@ -118,12 +154,12 @@ public final class GithubAuthManager {
             exchange.getResponseBody().write(message);
             exchange.getResponseBody().close();
 
-            latch.countDown();
+            record.authLatch.countDown();
         });
 
         try {
             URIBuilder builder = new URIBuilder(GITHUB_AUTH_URL)
-                    .addParameter("scope", "public_repo")
+                    .addParameter("scope", "public_repo gist")
                     .addParameter("client_id", CLIENT_ID)
                     .addParameter("state", state);
             URI uri = builder.build();
@@ -136,12 +172,17 @@ public final class GithubAuthManager {
             Neruina.LOGGER.info("Begun listening on \"http://localhost:{}/github/callback\" for Github authentication...", PORT);
             server.start();
 
-            latch.await();
+            boolean success = record.authLatch.await(5, TimeUnit.MINUTES);
+            if (!success) {
+                return null;
+            }
             String authCode = code.get();
-            if(authCode == null) {
-                throw new IOException("Failed to authenticate with GitHub");
+            if (authCode == null) {
+                throw new AbortedException("Failed to authenticate with GitHub");
             }
             return authCode;
+        } catch (AbortedException e) {
+            throw e;
         } catch (InterruptedException e) {
             Neruina.LOGGER.warn("Github authentication was interrupted", e);
             throw new CancellationException("Interrupted");
@@ -178,5 +219,13 @@ public final class GithubAuthManager {
         request.setHeader("Content-Type", "application/x-www-form-urlencoded");
         return request;
     }
+
+    static class LoginRecord {
+        private CountDownLatch loginLatch;
+        private AbortableCountDownLatch authLatch;
+        private boolean inProgress;
+        private @Nullable GitHub gitHub;
+    }
+
     /*?}*/
 }

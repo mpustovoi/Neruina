@@ -31,7 +31,7 @@ public abstract class WorldChunkMixin {
         }
     }
 
-    @Mixin(targets = "net.minecraft.world.chunk.WorldChunk.DirectBlockEntityTickInvoker")
+    @Mixin(targets = "net.minecraft.world.chunk.WorldChunk$DirectBlockEntityTickInvoker")
     private abstract static class DirectBlockEntityTickInvokerMixin {
         @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/BlockEntityTicker;tick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/entity/BlockEntity;)V"))
         private void catchTickingBlockEntity$notTheCauseOfTickLag(BlockEntityTicker<? extends BlockEntity> instance, World world, BlockPos pos, BlockState state, BlockEntity blockEntity, Operation<Void> original) {

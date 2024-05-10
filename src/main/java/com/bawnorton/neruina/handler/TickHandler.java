@@ -145,7 +145,7 @@ public final class TickHandler {
             );
             Neruina.LOGGER.warn("Neruina Caught An Exception, see below for cause", e);
             addErrored(instance, pos);
-            TickingEntry tickingEntry = new TickingEntry(instance, pos, e);
+            TickingEntry tickingEntry = new TickingEntry(instance, true, pos, e);
             trackError(tickingEntry);
             messageHandler.broadcastToPlayers(world.getServer(),
                     message,
@@ -179,7 +179,7 @@ public final class TickHandler {
             Neruina.LOGGER.warn("Neruina caught an exception, see below for cause", e);
             addErrored(blockEntity);
             if (!world.isClient()) {
-                TickingEntry tickingEntry = new TickingEntry(blockEntity, pos, e);
+                TickingEntry tickingEntry = new TickingEntry(blockEntity, true, pos, e);
                 trackError((Errorable) blockEntity, tickingEntry);
                 messageHandler.broadcastToPlayers(world.getServer(),
                         message,
@@ -197,13 +197,13 @@ public final class TickHandler {
         Neruina.LOGGER.warn("Neruina caught an exception, see below for cause", e);
         addErrored(instance);
         if (isServer) {
-            TickingEntry tickingEntry = new TickingEntry(instance, player.getBlockPos(), e);
-            trackError(tickingEntry, false);
+            TickingEntry tickingEntry = new TickingEntry(instance, false, player.getBlockPos(), e);
+            trackError((Errorable) (Object) instance, tickingEntry);
             MessageHandler messageHandler = Neruina.getInstance().getMessageHandler();
             messageHandler.sendToPlayer(player,
                     VersionedText.translatable("neruina.ticking.item_stack", instance.getName().getString(), slot),
-                    messageHandler.generateResourceActions(tickingEntry),
-                    messageHandler.generateResumeAction(ErroredType.ITEM_STACK, player.getUuidAsString())
+                    messageHandler.generateResumeAction(ErroredType.ITEM_STACK, player.getUuidAsString()),
+                    messageHandler.generateResourceActions(tickingEntry)
             );
         }
     }
@@ -249,7 +249,7 @@ public final class TickHandler {
         addErrored(entity);
         if (!entity.getWorld().isClient()) {
             BlockPos pos = entity.getBlockPos();
-            TickingEntry tickingEntry = new TickingEntry(entity, pos, e);
+            TickingEntry tickingEntry = new TickingEntry(entity, true, pos, e);
             trackError((Errorable) entity, tickingEntry);
             MessageHandler messageHandler = Neruina.getInstance().getMessageHandler();
             Text message = messageHandler.formatText("neruina.ticking.entity.%s".formatted(Config.getInstance().autoKillTickingEntities ? "killed" : "suspended"),
@@ -279,7 +279,7 @@ public final class TickHandler {
         String name = player.getDisplayName() == null ? player.getName().getString() : player.getDisplayName().getString();
         MessageHandler messageHandler = Neruina.getInstance().getMessageHandler();
         Text message = messageHandler.formatText("neruina.ticking.player", name);
-        TickingEntry tickingEntry = new TickingEntry(player, player.getBlockPos(), e);
+        TickingEntry tickingEntry = new TickingEntry(player, false, player.getBlockPos(), e);
         trackError(tickingEntry);
         messageHandler.broadcastToPlayers(server, message, messageHandler.generateResourceActions(tickingEntry));
         serverPlayer.networkHandler.disconnect(VersionedText.concat(VersionedText.translatable("neruina.kick.message"),
@@ -305,24 +305,14 @@ public final class TickHandler {
     }
 
     private void trackError(TickingEntry entry) {
-        trackError(entry, true);
+        trackError(null, entry);
     }
 
-    private void trackError(TickingEntry entry, boolean persist) {
-        trackError(null, entry, persist);
-    }
-
-    private void trackError(Errorable errorable, TickingEntry entry) {
-        trackError(errorable, entry, true);
-    }
-
-    private void trackError(@Nullable Errorable errorable, TickingEntry entry, boolean persist) {
+    private void trackError(@Nullable Errorable errorable, TickingEntry entry) {
         recentErrors.add(entry);
-        if(persist) {
-            addTickingEntry(entry);
-        }
+        addTickingEntry(entry);
         if (errorable != null) {
-            errorable.neruina$setTickingEntry(entry.uuid());
+            errorable.neruina$setTickingEntryId(entry.uuid());
         }
         if (Config.getInstance().tickingExceptionThreshold != -1 && recentErrors.size() >= Config.getInstance().tickingExceptionThreshold) {
             CrashReport report = CrashReport.create(
@@ -377,7 +367,7 @@ public final class TickHandler {
     public void removeErrored(Object obj) {
         if (obj instanceof Errorable errorable) {
             errorable.neruina$clearErrored();
-            tickingEntries.remove(errorable.neruina$getTickingEntry());
+            tickingEntries.remove(errorable.neruina$getTickingEntryId());
         }
     }
 
@@ -387,7 +377,7 @@ public final class TickHandler {
         }
     }
 
-    public TickingEntry getTickingEntry(UUID uuid) {
+    public @Nullable TickingEntry getTickingEntry(UUID uuid) {
         return tickingEntries.get(uuid);
     }
 
@@ -396,13 +386,29 @@ public final class TickHandler {
     }
 
     public void addTickingEntry(TickingEntry entry) {
-        tickingEntries.put(entry.uuid(), entry);
+        Object cause = entry.getCause();
+        boolean shouldAdd = false;
+        if (isErrored(cause)) {
+            shouldAdd = true;
+        } else if (cause instanceof BlockState state) {
+            shouldAdd = isErrored(state, entry.pos());
+        }
+        if (shouldAdd) {
+            tickingEntries.put(entry.uuid(), entry);
+        }
     }
 
     public Optional<UUID> getTickingEntryId(Object obj) {
-        if (obj instanceof Errorable errorable) {
-            return Optional.ofNullable(errorable.neruina$getTickingEntry());
+        if (obj instanceof Errorable errorable && errorable.neruina$isErrored()) {
+            return Optional.ofNullable(errorable.neruina$getTickingEntryId());
         }
         return Optional.empty();
+    }
+
+    public int clearTracked() {
+        int size = tickingEntries.size();
+        tickingEntries.clear();
+        recentErrors.clear();
+        return size;
     }
 }

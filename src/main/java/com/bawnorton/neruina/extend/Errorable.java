@@ -9,7 +9,7 @@ public interface Errorable {
 
     void neruina$clearErrored();
 
-    UUID neruina$getTickingEntry();
+    UUID neruina$getTickingEntryId();
 
-    void neruina$setTickingEntry(UUID uuid);
+    void neruina$setTickingEntryId(UUID uuid);
 }

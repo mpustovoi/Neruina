@@ -34,12 +34,12 @@ public abstract class BlockEntityMixin implements Errorable {
     }
 
     @Override
-    public void neruina$setTickingEntry(UUID uuid) {
+    public void neruina$setTickingEntryId(UUID uuid) {
         neruina$tickingEntryId = uuid;
     }
 
     @Override
-    public UUID neruina$getTickingEntry() {
+    public UUID neruina$getTickingEntryId() {
         return neruina$tickingEntryId;
     }
 

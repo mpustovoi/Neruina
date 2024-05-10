@@ -15,6 +15,8 @@ import net.minecraft.registry.Registry;
 import com.mojang.serialization.Codec;
 import net.minecraft.component.DataComponentType;
 import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.util.Uuids;
+import java.util.UUID;
 *//*? }*/
 
 public class Neruina {
@@ -29,6 +31,7 @@ public class Neruina {
 
     /*? if >=1.20.2 {*//*
     private static DataComponentType<Boolean> ERRORED;
+    private static DataComponentType<UUID> TICKING_ENTRY_ID;
     *//*? }*/
 
     public Neruina() {
@@ -43,7 +46,18 @@ public class Neruina {
 
     public void setup() {
         /*? if >=1.20.2 {*//*
-        ERRORED = Registry.register(Registries.DATA_COMPONENT_TYPE, MOD_ID + ":errored", DataComponentType.<Boolean>builder().codec(Codec.BOOL).packetCodec(PacketCodecs.BOOL).build());
+        ERRORED = Registry.register(Registries.DATA_COMPONENT_TYPE, MOD_ID + ":errored",
+                DataComponentType.<Boolean>builder()
+                        .codec(Codec.BOOL)
+                        .packetCodec(PacketCodecs.BOOL)
+                        .build()
+        );
+        TICKING_ENTRY_ID = Registry.register(Registries.DATA_COMPONENT_TYPE, MOD_ID + ":ticking_entry_id",
+                DataComponentType.<UUID>builder()
+                        .codec(Uuids.CODEC)
+                        .packetCodec(Uuids.PACKET_CODEC)
+                        .build()
+        );
         *//*? }*/
     }
 
@@ -70,6 +84,10 @@ public class Neruina {
     /*? if >=1.20.2 {*//*
     public DataComponentType<Boolean> getErroredComponent() {
         return ERRORED;
+    }
+
+    public DataComponentType<UUID> getTickingEntryIdComponent() {
+        return TICKING_ENTRY_ID;
     }
     *//*? }*/
 }

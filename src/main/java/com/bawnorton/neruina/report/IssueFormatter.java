@@ -4,13 +4,22 @@ import com.bawnorton.neruina.platform.Platform;
 import com.bawnorton.neruina.util.TickingEntry;
 import net.minecraft.SharedConstants;
 import org.apache.commons.lang3.StringUtils;
+import org.kohsuke.github.GHGist;
+import org.kohsuke.github.GHGistBuilder;
+import org.kohsuke.github.GitHub;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 public class IssueFormatter {
     /*? if >=1.19 {*/
@@ -48,10 +57,12 @@ public class IssueFormatter {
         
         </details>
         
-        This issue was created automatically by Neruina's AutoReporter. To opt-out of this feature, remove the neruina/auto_report.json file from your mod's data resources.
+        This issue was created automatically by Neruina's AutoReporter. To opt-out of this feature, remove the `neruina/auto_report.json` file from your mod's data resources.
         """;
 
     private final AutoReportConfig config;
+
+    private final Map<UUID, GHGist> gists = new HashMap<>();
 
     public IssueFormatter(AutoReportConfig config) {
         this.config = config;
@@ -81,11 +92,34 @@ public class IssueFormatter {
     }
 
     public String getTitle(TickingEntry entry) {
-        return replacePlaceholders((config.title() == null) ? DEFAULT_TITLE : config.title(), Restriction.TITLE, entry);
+        String unverifiedTitle = replacePlaceholders((config.title() == null) ? DEFAULT_TITLE : config.title(), Restriction.TITLE, entry);
+        if(unverifiedTitle.length() >= 256) {
+            return unverifiedTitle.substring(0, 253) + "...";
+        } else {
+            return unverifiedTitle;
+        }
     }
 
-    public String getBody(TickingEntry entry) {
-        return replacePlaceholders((config.body() == null) ? DEFAULT_BODY : config.body(), Restriction.BODY, entry);
+    public String getBody(TickingEntry entry, GitHub github) {
+        String rawBody = (config.body() == null) ? DEFAULT_BODY : config.body();
+        String unverifiedBody = replacePlaceholders(rawBody, Restriction.BODY, entry);
+        if (unverifiedBody.length() < 65536) return unverifiedBody;
+
+        String crashReport = "```\n%s\n```".formatted(entry.createCrashReport().asString());
+        GHGist gist = gists.computeIfAbsent(entry.uuid(), uuid -> {
+            try {
+                return github.createGist()
+                        .public_(true)
+                        .description("Neruina Auto Report")
+                        .file("crash_report.md", crashReport)
+                        .create();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to create a gist for the crash report", e);
+            }
+        });
+        String gistUrl = gist.getHtmlUrl().toString();
+        rawBody = rawBody.replace("<report>", "[Full Crash Report](%s) - Content was too long for an issue body".formatted(gistUrl));
+        return replacePlaceholders(rawBody, Restriction.BODY, entry);
     }
 
     private record Placeholder(String key, boolean isModifiable, Restriction restriction, Applier applier) {
@@ -110,7 +144,7 @@ public class IssueFormatter {
             return result;
         }
 
-        private record Modifier(Predicate<String> predicate, Function<String, String> modification) {
+        private record Modifier(Predicate<String> predicate, UnaryOperator<String> modification) {
             public boolean applies(String s) {
                 return predicate.test(s);
             }

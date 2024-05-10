@@ -49,12 +49,12 @@ public abstract class EntityMixin implements Errorable {
     }
 
     @Override
-    public void neruina$setTickingEntry(UUID uuid) {
+    public void neruina$setTickingEntryId(UUID uuid) {
         neruina$tickingEntryId = uuid;
     }
 
     @Override
-    public UUID neruina$getTickingEntry() {
+    public UUID neruina$getTickingEntryId() {
         return neruina$tickingEntryId;
     }
 
@@ -87,12 +87,25 @@ public abstract class EntityMixin implements Errorable {
             if (source.getAttacker() instanceof ServerPlayerEntity player) {
                 TickingEntry entry = Neruina.getInstance().getTickHandler().getTickingEntry(neruina$tickingEntryId);
                 MessageHandler messageHandler = Neruina.getInstance().getMessageHandler();
-                messageHandler.sendToPlayer(
-                        player,
-                        VersionedText.translatable("neruina.suspended.entity", getName().getString()),
-                        messageHandler.generateEntityActions((Entity) (Object) this),
-                        messageHandler.generateResourceActions(entry)
-                );
+                if(entry == null) {
+                    messageHandler.sendToPlayer(
+                            player,
+                            VersionedText.concatDelimited(
+                                    VersionedText.LINE_BREAK,
+                                    VersionedText.translatable("neruina.suspended.entity", getName().getString()),
+                                    VersionedText.translatable("neruina.suspended.entity.untracked")
+                            ),
+                            messageHandler.generateEntityActions((Entity) (Object) this),
+                            messageHandler.generateInfoAction()
+                    );
+                } else {
+                    messageHandler.sendToPlayer(
+                            player,
+                            VersionedText.translatable("neruina.suspended.entity", getName().getString()),
+                            messageHandler.generateEntityActions((Entity) (Object) this),
+                            messageHandler.generateResourceActions(entry)
+                    );
+                }
             }
             /*? if >=1.20 { *//*
             return source != getWorld().getDamageSources().genericKill();

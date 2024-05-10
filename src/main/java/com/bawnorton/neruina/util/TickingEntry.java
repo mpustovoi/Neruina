@@ -28,26 +28,26 @@ import java.util.function.Supplier;
 
 public final class TickingEntry {
     private final Supplier<@Nullable Object> causeSupplier;
+    private final boolean persitent;
     private final BlockPos pos;
-    private final UUID uuid;
     private final Throwable error;
+    private final UUID uuid;
     private String cachedCauseType;
     private String cachedCauseName;
 
-    public TickingEntry(Object cause, BlockPos pos, Throwable error) {
+    public TickingEntry(Object cause, boolean persitent, BlockPos pos, Throwable error) {
         this.causeSupplier = () -> cause;
+        this.persitent = persitent;
         this.pos = pos;
         this.error = error;
+        this.uuid = UUID.randomUUID();
 
         this.update();
-
-        long errorHash = error.getMessage().hashCode() ^ error.getClass().hashCode() ^ 0x9e324799;
-        long causeHash = getCauseName().hashCode() ^ getCauseType().hashCode() ^ pos.asLong() ^ 0x376c3fa1;
-        this.uuid = new UUID(errorHash, causeHash);
     }
 
-    private TickingEntry(Supplier<@Nullable Object> causeSupplier, BlockPos pos, UUID uuid, Throwable error) {
+    private TickingEntry(Supplier<@Nullable Object> causeSupplier, boolean persitent, BlockPos pos, UUID uuid, Throwable error) {
         this.causeSupplier = causeSupplier;
+        this.persitent = persitent;
         this.pos = pos;
         this.uuid = uuid;
         this.error = error;
@@ -229,7 +229,7 @@ public final class TickingEntry {
         } else if (causeType.equals(Type.BLOCK_STATE.type)) {
             cause = () -> world.getBlockState(pos);
         }
-        TickingEntry entry = new TickingEntry(cause, pos, uuid, error);
+        TickingEntry entry = new TickingEntry(cause, true, pos, uuid, error);
         entry.cachedCauseType = causeType;
         entry.cachedCauseName = causeName;
         return entry;
@@ -291,6 +291,10 @@ public final class TickingEntry {
 
     public Throwable error() {
         return error;
+    }
+
+    public boolean isPersitent() {
+        return persitent;
     }
 
     @Override

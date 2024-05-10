@@ -8,6 +8,7 @@
     "CommandManagerMixin",
     "CrashReportSectionMixin",
     "MinecraftServerMixin",
+    "PlayerManagerMixin",
     "accessor.WorldChunkAccessor",
     "catchers.PlayerInventoryMixin",
     "catchers.ServerPlayNetworkHandlerMixin",

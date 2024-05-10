@@ -37,6 +37,9 @@ public abstract class ItemStackMixin implements Errorable {
     @Unique
     private boolean neruina$errored = false;
 
+    @Unique
+    private UUID neruina$tickingEntryId = null;
+
     @Override
     public boolean neruina$isErrored() {
         return neruina$errored;
@@ -55,28 +58,31 @@ public abstract class ItemStackMixin implements Errorable {
     }
 
     @Override
-    public void neruina$setTickingEntry(UUID uuid) {
+    public void neruina$setTickingEntryId(UUID uuid) {
+        neruina$tickingEntryId = uuid;
+        neruina$updateData();
     }
 
     @Override
-    public UUID neruina$getTickingEntry() {
-        return null;
+    public UUID neruina$getTickingEntryId() {
+        return neruina$tickingEntryId;
     }
 
     /*? if >=1.20.2 {*//*
     @Unique
     private void neruina$updateData() {
-        ComponentChanges changes = ComponentChanges.builder()
-                .add(Neruina.getInstance().getErroredComponent(), neruina$errored)
-                .build();
-        components.applyChanges(changes);
+        ComponentChanges.Builder builder = ComponentChanges.builder()
+                .add(Neruina.getInstance().getErroredComponent(), neruina$errored);
+        if (neruina$tickingEntryId != null) {
+            builder.add(Neruina.getInstance().getTickingEntryIdComponent(), neruina$tickingEntryId);
+        }
+        components.applyChanges(builder.build());
     }
 
     @Inject(method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/ComponentMapImpl;)V", at = @At("TAIL"))
     private void readErroredFromComponents(ItemConvertible item, int count, ComponentMapImpl components, CallbackInfo ci) {
-        if(components.contains(Neruina.getInstance().getErroredComponent())) {
-            neruina$errored = components.getOrDefault(Neruina.getInstance().getErroredComponent(), false);
-        }
+        neruina$errored = components.getOrDefault(Neruina.getInstance().getErroredComponent(), false);
+        neruina$tickingEntryId = components.getOrDefault(Neruina.getInstance().getTickingEntryIdComponent(), null);
     }
     *//*? } else {*/
     @Unique
@@ -84,8 +90,12 @@ public abstract class ItemStackMixin implements Errorable {
         NbtCompound nbt = getOrCreateNbt();
         if (neruina$errored) {
             nbt.putBoolean("neruina$errored", true);
+            if (neruina$tickingEntryId != null) {
+                nbt.putUuid("neruina$tickingEntryId", neruina$tickingEntryId);
+            }
         } else {
             nbt.remove("neruina$errored");
+            nbt.remove("neruina$tickingEntryId");
         }
     }
 
@@ -96,6 +106,9 @@ public abstract class ItemStackMixin implements Errorable {
             assert tag != null;
             if (tag.contains("neruina$errored")) {
                 neruina$errored = tag.getBoolean("neruina$errored");
+            }
+            if (tag.contains("neruina$tickingEntryId")) {
+                neruina$tickingEntryId = tag.getUuid("neruina$tickingEntryId");
             }
         }
     }

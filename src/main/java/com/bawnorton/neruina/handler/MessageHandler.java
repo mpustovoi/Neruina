@@ -1,15 +1,14 @@
 package com.bawnorton.neruina.handler;
 
+import com.bawnorton.neruina.Neruina;
 import com.bawnorton.neruina.config.Config;
 import com.bawnorton.neruina.thread.ConditionalRunnable;
 import com.bawnorton.neruina.util.ErroredType;
 import com.bawnorton.neruina.util.TickingEntry;
 import com.bawnorton.neruina.version.VersionedText;
-import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
@@ -19,8 +18,9 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 public final class MessageHandler {
     public void broadcastToPlayers(MinecraftServer server, Text message) {
@@ -47,97 +47,36 @@ public final class MessageHandler {
         );
     }
 
-    public void broadcastToPlayers(MinecraftServer server, String key, Object... args) {
-        broadcastToPlayers(server, formatText(key, args));
+    public void sendToPlayer(PlayerEntity player, Text message, @Nullable Text... actions) {
+        sendToPlayer(player, message, true, actions);
     }
 
-    public void broadcastToPlayers(CommandContext<ServerCommandSource> context, String key, Object... args) {
-        broadcastToPlayers(context.getSource().getServer(), key, args);
+    public void sendToPlayer(PlayerEntity player, Text message, boolean pad, @Nullable Text... actions) {
+        message = VersionedText.concatDelimited(
+                VersionedText.LINE_BREAK,
+                VersionedText.format(message),
+                actions != null ? VersionedText.concatDelimited(VersionedText.LINE_BREAK, actions) : null
+        );
+        player.sendMessage(pad ? VersionedText.pad(message) : message, false);
     }
 
     public Text generateEntityActions(Entity entity) {
         return VersionedText.concatDelimited(
                 VersionedText.SPACE,
                 generateHandlingActions(ErroredType.ENTITY, entity.getBlockPos(), entity.getUuid()),
-                Texts.bracketed(VersionedText.withStyle(
-                        VersionedText.translatable("neruina.kill_entity"),
-                        style -> style.withColor(Formatting.DARK_RED)
-                                .withClickEvent(new ClickEvent(
-                                        ClickEvent.Action.RUN_COMMAND,
-                                        "/neruina kill %s".formatted(entity.getUuid())
-                                ))
-                                .withHoverEvent(new HoverEvent(
-                                        HoverEvent.Action.SHOW_TEXT,
-                                        VersionedText.translatable("neruina.kill_entity.tooltip")
-                                ))
-                ))
+                generateKillAction(entity.getUuid())
         );
     }
 
     public Text generateResourceActions(TickingEntry entry) {
-        StringWriter traceString = new StringWriter();
-        PrintWriter writer = new PrintWriter(traceString);
-        entry.error().printStackTrace(writer);
-        String trace = traceString.toString();
-        writer.flush();
-        writer.close();
         return VersionedText.concatDelimited(
                 VersionedText.SPACE,
                 generateInfoAction(),
-                Texts.bracketed(VersionedText.withStyle(
-                        VersionedText.translatable("neruina.copy_crash"),
-                        style -> style.withColor(Formatting.GOLD)
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, trace))
-                                .withHoverEvent(new HoverEvent(
-                                        HoverEvent.Action.SHOW_TEXT,
-                                        VersionedText.translatable("neruina.copy_crash.tooltip")
-                                ))
-                ))
+                generateCopyCrashAction(entry)
                 /*? if >=1.19 {*/
-                ,Texts.bracketed(VersionedText.withStyle(
-                        VersionedText.translatable("neruina.report"),
-                        style -> style.withColor(Formatting.LIGHT_PURPLE)
-                                .withClickEvent(new ClickEvent(
-                                        ClickEvent.Action.RUN_COMMAND,
-                                        "/neruina report %s".formatted(entry.uuid())
-                                ))
-                                .withHoverEvent(new HoverEvent(
-                                        HoverEvent.Action.SHOW_TEXT,
-                                        VersionedText.translatable("neruina.report.tooltip")
-                                ))
-                ))
+                , generateReportAction(entry)
                 /*?}*/
         );
-    }
-
-    public Text generateTeleportAction(ErroredType type, BlockPos pos) {
-        return Texts.bracketed(VersionedText.withStyle(
-                VersionedText.translatable("neruina.teleport"),
-                style -> style.withColor(Formatting.DARK_AQUA)
-                        .withClickEvent(new ClickEvent(
-                                ClickEvent.Action.RUN_COMMAND,
-                                "/tp @s %s".formatted(posAsNums(pos))
-                        ))
-                        .withHoverEvent(new HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                VersionedText.translatable("neruina.teleport.%s.tooltip".formatted(type.getName()))
-                        ))
-        ));
-    }
-
-    public Text generateInfoAction() {
-        return Texts.bracketed(VersionedText.withStyle(
-                VersionedText.translatable("neruina.info"),
-                style -> style.withColor(Formatting.GREEN)
-                        .withClickEvent(new ClickEvent(
-                                ClickEvent.Action.OPEN_URL,
-                                "https://github.com/Bawnorton/Neruina/wiki/What-Is-This%3F"
-                        ))
-                        .withHoverEvent(new HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                VersionedText.translatable("neruina.info.tooltip")
-                        ))
-        ));
     }
 
     public Text generateHandlingActions(ErroredType type, BlockPos pos) {
@@ -152,27 +91,132 @@ public final class MessageHandler {
         );
     }
 
+    public Text generateKillAction(UUID uuid) {
+        return generateCommandAction("neruina.kill", Formatting.DARK_RED, "/neruina kill %s".formatted(uuid));
+    }
+
+    public Text generateCopyCrashAction(TickingEntry entry) {
+        StringWriter traceString = new StringWriter();
+        PrintWriter writer = new PrintWriter(traceString);
+        entry.error().printStackTrace(writer);
+        String trace = traceString.toString();
+        writer.flush();
+        writer.close();
+        return generateAction("neruina.copy_crash", Formatting.GOLD, ClickEvent.Action.COPY_TO_CLIPBOARD, trace);
+    }
+
+    public Text generateReportAction(TickingEntry entry) {
+        return generateCommandAction(
+                "neruina.report",
+                Formatting.LIGHT_PURPLE,
+                "/neruina report %s".formatted(entry.uuid())
+        );
+    }
+
+    public Text generateTeleportAction(ErroredType type, BlockPos pos) {
+        return generateCommandAction(
+                "neruina.teleport",
+                "neruina.teleport.%s.tooltip".formatted(type.getName()),
+                Formatting.DARK_AQUA,
+                "/tp @s %s".formatted(posAsNums(pos))
+        );
+    }
+
+    public Text generateInfoAction() {
+        return generateAction(
+                "neruina.info",
+                Formatting.GREEN,
+                ClickEvent.Action.OPEN_URL,
+                "https://github.com/Bawnorton/Neruina/wiki/What-Is-This%3F"
+        );
+    }
+
     public Text generateResumeAction(ErroredType type, String args) {
+        return generateCommandAction(
+                "neruina.try_resume",
+                "neruina.try_resume.%s.tooltip".formatted(type.getName()),
+                Formatting.YELLOW,
+                "/neruina resume %s %s".formatted(type.getName(), args)
+        );
+    }
+
+    public Text generateClearAction() {
+        return generateCommandAction("neruina.clear", Formatting.BLUE, "/neruina clear_tracked");
+    }
+
+    public Text generateOpenReportAction(String url) {
+        return generateAction("neruina.open_report", Formatting.LIGHT_PURPLE, ClickEvent.Action.OPEN_URL, url);
+    }
+
+    public Text generateCancelLoginAction() {
+        return generateCommandAction("neruina.cancel", Formatting.DARK_RED, "/neruina cancel_login");
+    }
+
+    private Text generateCommandAction(String key, Formatting color, String command) {
+        return generateCommandAction(key, "%s.tooltip".formatted(key), color, command);
+    }
+
+    private Text generateCommandAction(String key, String hoverKey, Formatting color, String command) {
+        return generateAction(key, hoverKey, color, ClickEvent.Action.RUN_COMMAND, command);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private Text generateCommandAction(Text message, String hoverKey, Formatting color, String command) {
+        return generateCommandAction(message, VersionedText.translatable(hoverKey), color, command);
+    }
+
+    private Text generateCommandAction(Text message, Text hoverMessage, Formatting color, String command) {
+        return generateAction(message, hoverMessage, color, ClickEvent.Action.RUN_COMMAND, command);
+    }
+
+    private Text generateAction(String key, Formatting color, ClickEvent.Action action, String value) {
+        return generateAction(key, "%s.tooltip".formatted(key), color, action, value);
+    }
+
+    private Text generateAction(String key, String hoverKey, Formatting color, ClickEvent.Action action, String value) {
+        return generateAction(VersionedText.translatable(key), VersionedText.translatable(hoverKey), color, action, value);
+    }
+
+    private Text generateAction(Text message, Text hoverMessage, Formatting color, ClickEvent.Action action, String value) {
         return Texts.bracketed(VersionedText.withStyle(
-                VersionedText.translatable("neruina.try_resume"),
-                style -> style.withColor(Formatting.YELLOW)
-                        .withClickEvent(new ClickEvent(
-                                ClickEvent.Action.RUN_COMMAND,
-                                "/neruina resume %s %s".formatted(type.getName(), args)
-                        ))
+                message,
+                style -> style.withColor(color)
+                        .withClickEvent(new ClickEvent(action, value))
                         .withHoverEvent(new HoverEvent(
                                 HoverEvent.Action.SHOW_TEXT,
-                                VersionedText.translatable("neruina.try_resume.%s.tooltip".formatted(type.getName()))
+                                hoverMessage
                         ))
         ));
     }
 
-    public void sendToPlayer(PlayerEntity player, Text message, @Nullable Text... actions) {
-        player.sendMessage(VersionedText.pad(VersionedText.concatDelimited(
-                VersionedText.LINE_BREAK,
-                VersionedText.format(message),
-                actions != null ? VersionedText.concatDelimited(VersionedText.LINE_BREAK, actions) : null
-        )), false);
+    public Text generateSuspendedInfo() {
+        TickHandler tickHandler = Neruina.getInstance().getTickHandler();
+        List<Text> tickingEntryMessages = new ArrayList<>();
+        int count = tickHandler.getTickingEntries().size();
+
+        if(count == 1) {
+            tickingEntryMessages.add(formatText("neruina.ticking_entries.count.single"));
+        } else {
+            tickingEntryMessages.add(formatText("neruina.ticking_entries.count", count));
+        }
+        tickHandler.getTickingEntries().forEach(entry -> tickingEntryMessages.add(
+                generateCommandAction(
+                        VersionedText.translatable(
+                                "neruina.ticking_entries.entry",
+                                entry.getCauseName(),
+                                posAsNums(entry.pos())
+                        ),
+                        "neruina.ticking_entries.entry.tooltip",
+                        Formatting.DARK_RED,
+                        "/neruina info %s".formatted(entry.uuid())
+                )
+        ));
+        tickingEntryMessages.add(VersionedText.concatDelimited(
+                VersionedText.SPACE,
+                generateInfoAction(),
+                generateClearAction()
+        ));
+        return VersionedText.concatDelimited(VersionedText.LINE_BREAK, tickingEntryMessages.toArray(new Text[0]));
     }
 
     public Text formatText(String key, Object... args) {

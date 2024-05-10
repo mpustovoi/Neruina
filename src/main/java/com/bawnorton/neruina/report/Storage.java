@@ -1,6 +1,5 @@
 package com.bawnorton.neruina.report;
 
-import com.bawnorton.neruina.Neruina;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import javax.crypto.Cipher;
@@ -17,7 +16,7 @@ public class Storage {
 
     public static void init(MinecraftServer server) {
         server.getResourceManager()
-                .findResources(Neruina.MOD_ID, (resource) -> resource.getPath().equals("neruina/storage.json"))
+                .findResources("storage", (resource) -> resource.getPath().equals("storage/a.json"))
                 .forEach((id, resource) -> {
                     try (JsonReader reader = new JsonReader(resource.getReader())) {
                         storageData = GSON.fromJson(reader, StorageData.class);
