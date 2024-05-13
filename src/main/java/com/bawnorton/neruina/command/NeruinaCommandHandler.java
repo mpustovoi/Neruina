@@ -38,8 +38,8 @@ public final class NeruinaCommandHandler {
     
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("neruina")
-                .requires(source -> source.hasPermissionLevel(2))
                 .then(CommandManager.literal("resume")
+                        .requires(source -> source.hasPermissionLevel(2))
                         .then(CommandManager.literal("entity")
                                 .then(CommandManager.argument("entity", EntityArgumentType.entity())
                                         .executes(NeruinaCommandHandler::executeResumeEntity)
@@ -62,6 +62,7 @@ public final class NeruinaCommandHandler {
                         )
                 )
                 .then(CommandManager.literal("kill")
+                        .requires(source -> source.hasPermissionLevel(2))
                         .then(CommandManager.argument("entity", EntityArgumentType.entities())
                                 .executes(NeruinaCommandHandler::executeKill)
                         )
@@ -90,6 +91,7 @@ public final class NeruinaCommandHandler {
                         )
                 )
                 .then(CommandManager.literal("clear_tracked")
+                        .requires(source -> source.hasPermissionLevel(2))
                         .executes(NeruinaCommandHandler::executeClear)
                 )
                 .then(CommandManager.literal("show_suspended")

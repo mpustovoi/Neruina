@@ -153,10 +153,10 @@ publishMods {
 	version = mod_version
 	modLoaders.add(mod_loader)
 
-	dryRun = true
+	dryRun = false
 
 	github {
-		accessToken = providers.environmentVariable("GITHUB_TOKEN")
+		accessToken = providers.gradleProperty("GITHUB_TOKEN")
 		repository = "Bawnorton/Neruina"
 		commitish = "stonecutter"
 		changelog = getRootProject().file("CHANGELOG.md").readLines().join("\n")
@@ -164,7 +164,7 @@ publishMods {
 	}
 
 	modrinth {
-		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+		accessToken = providers.gradleProperty("MODRINTH_TOKEN")
 		projectId = "1s5x833P"
 		minecraftVersions.add(minecraft_version)
 		if(isFabric) {
@@ -175,7 +175,7 @@ publishMods {
 	}
 
 	curseforge {
-		accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+		accessToken = providers.gradleProperty("CURSEFORGE_TOKEN")
 		projectId = "851046"
 		minecraftVersions.add(minecraft_version)
 		if(isFabric) {
