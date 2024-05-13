@@ -82,5 +82,5 @@
   "commands.neruina.clear": "Cleared %s tracked ticking entries.",
   "commands.neruina.clear.none": "There are no tracked ticking entries to clear.",
   "commands.neruina.cancel.not_logging_in": "No active authentication request to cancel.",
-  "commands.show_suspended.none": "There are no suspended ticking entries."
+  "commands.neruina.show_suspended.none": "There are no suspended ticking entries."
 }

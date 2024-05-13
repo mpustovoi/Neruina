@@ -18,13 +18,13 @@ public abstract class PlayerInventoryMixin {
 
     @Inject(method = "readNbt", at = @At("TAIL"))
     private void removeErroredStatusOnInvInit(CallbackInfo ci) {
-        /*? if >=1.20.2 {*//*
+        /*? if >=1.20.2 {*/
         main.forEach(stack -> {
             if(stack.getOrDefault(Neruina.getInstance().getErroredComponent(), false)) {
                 Neruina.getInstance().getTickHandler().removeErrored(stack);
             }
         });
-        *//*? } else {*/
+        /*? } else {*//*
         main.forEach(stack -> {
             if(stack.hasNbt()) {
                 NbtCompound nbt = stack.getNbt();
@@ -33,6 +33,6 @@ public abstract class PlayerInventoryMixin {
                 }
             }
         });
-        /*? }*/
+        *//*? }*/
     }
 }

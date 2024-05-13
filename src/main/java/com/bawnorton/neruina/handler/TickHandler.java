@@ -398,6 +398,10 @@ public final class TickHandler {
         }
     }
 
+    public void addTickingEntryUnsafe(TickingEntry entry) {
+        tickingEntries.put(entry.uuid(), entry);
+    }
+
     public Optional<UUID> getTickingEntryId(Object obj) {
         if (obj instanceof Errorable errorable && errorable.neruina$isErrored()) {
             return Optional.ofNullable(errorable.neruina$getTickingEntryId());
