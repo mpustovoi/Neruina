@@ -1,6 +1,8 @@
 package com.bawnorton.neruina.mixin.catchers;
 
 import com.bawnorton.neruina.Neruina;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -20,7 +22,11 @@ public abstract class PlayerInventoryMixin {
     private void removeErroredStatusOnInvInit(CallbackInfo ci) {
         /*? if >=1.20.2 {*/
         main.forEach(stack -> {
-            if(stack.getOrDefault(Neruina.getInstance().getErroredComponent(), false)) {
+            NbtComponent component = stack.get(DataComponentTypes.CUSTOM_DATA);
+            if (component == null) return;
+
+            NbtCompound nbt = component.copyNbt();
+            if(nbt.getBoolean("neruina$errored")) {
                 Neruina.getInstance().getTickHandler().removeErrored(stack);
             }
         });

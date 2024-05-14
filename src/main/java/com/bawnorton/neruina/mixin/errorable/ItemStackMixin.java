@@ -1,6 +1,5 @@
 package com.bawnorton.neruina.mixin.errorable;
 
-import com.bawnorton.neruina.Neruina;
 import com.bawnorton.neruina.extend.Errorable;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
@@ -17,6 +16,8 @@ import java.util.UUID;
 
 /*? if >=1.20.2 {*/
 import net.minecraft.component.ComponentChanges;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.component.ComponentMapImpl;
 /*? }*/
 
@@ -71,18 +72,26 @@ public abstract class ItemStackMixin implements Errorable {
     /*? if >=1.20.2 {*/
     @Unique
     private void neruina$updateData() {
-        ComponentChanges.Builder builder = ComponentChanges.builder()
-                .add(Neruina.getInstance().getErroredComponent(), neruina$errored);
-        if (neruina$tickingEntryId != null) {
-            builder.add(Neruina.getInstance().getTickingEntryIdComponent(), neruina$tickingEntryId);
+        NbtCompound nbt = new NbtCompound();
+        nbt.putBoolean("neruina$errored", neruina$errored);
+        if(neruina$tickingEntryId != null) {
+            nbt.putUuid("neruina$tickingEntryId", neruina$tickingEntryId);
         }
+        ComponentChanges.Builder builder = ComponentChanges.builder()
+                .add(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
         components.applyChanges(builder.build());
     }
 
     @Inject(method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/ComponentMapImpl;)V", at = @At("TAIL"))
     private void readErroredFromComponents(ItemConvertible item, int count, ComponentMapImpl components, CallbackInfo ci) {
-        neruina$errored = components.getOrDefault(Neruina.getInstance().getErroredComponent(), false);
-        neruina$tickingEntryId = components.getOrDefault(Neruina.getInstance().getTickingEntryIdComponent(), null);
+        NbtComponent nbtComponent = components.get(DataComponentTypes.CUSTOM_DATA);
+        if (nbtComponent == null) return;
+
+        NbtCompound tag = nbtComponent.copyNbt();
+        neruina$errored = tag.getBoolean("neruina$errored");
+        if(tag.contains("neruina$tickingEntryId")) {
+            neruina$tickingEntryId = tag.getUuid("neruina$tickingEntryId");
+        }
     }
     /*? } else {*//*
     @Unique

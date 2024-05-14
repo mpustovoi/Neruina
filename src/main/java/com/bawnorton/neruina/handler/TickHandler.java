@@ -279,9 +279,16 @@ public final class TickHandler {
         TickingEntry tickingEntry = new TickingEntry(player, false, player.getBlockPos(), e);
         trackError(tickingEntry);
         messageHandler.broadcastToPlayers(server, message, messageHandler.generateResourceActions(tickingEntry));
-        player.networkHandler.disconnect(VersionedText.concat(VersionedText.translatable("neruina.kick.message"),
-                VersionedText.translatable("neruina.kick.reason")
-        ));
+        try {
+            player.networkHandler.disconnect(
+                    VersionedText.concat(
+                            VersionedText.translatable("neruina.kick.message"),
+                            VersionedText.translatable("neruina.kick.reason")
+                    )
+            );
+        } catch (NullPointerException ex) {
+            Neruina.LOGGER.error("Neruina caught an exception on a player, but the player is not connected, this should not happen. Behaviour is undefined.", ex);
+        }
     }
 
     private void handleTickingClient(PlayerEntity player, Throwable e) {

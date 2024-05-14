@@ -5,6 +5,7 @@ import com.bawnorton.neruina.util.annotation.ModLoaderMixin;
 import com.bawnorton.neruina.util.annotation.Version;
 import com.bawnorton.neruina.platform.ModLoader;
 import com.bawnorton.neruina.platform.Platform;
+import com.bawnorton.neruina.util.annotation.VersionedMixin;
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.objectweb.asm.Type;
@@ -77,29 +78,42 @@ public class NeruinaMixinPlugin implements IMixinConfigPlugin {
                         ComparableVersion comparableVersion = new ComparableVersion(currentVersion);
                         String min = Annotations.getValue(versionNode, "min", "");
                         String max = Annotations.getValue(versionNode, "max", "");
-                        if (!min.isBlank()) {
-                            shouldApply &= comparableVersion.compareTo(new ComparableVersion(min)) >= 0;
-                        }
-                        if (!max.isBlank()) {
-                            shouldApply &= comparableVersion.compareTo(new ComparableVersion(max)) <= 0;
-                        }
-                        LOGGER.debug("%s is %sbeing applied because we are using %s %s".formatted(className,
-                                shouldApply ? "" : "not ",
-                                Platform.getModLoader(),
-                                currentVersion
-                        ));
+                        shouldApply &= evaluateVersion(className, min, max, currentVersion, comparableVersion);
                     } else {
                         LOGGER.debug("%s is %sbeing applied because we are using %s".formatted(className,
                                 shouldApply ? "" : "not ",
                                 Platform.getModLoader()
                         ));
                     }
+                } else if (node.desc.equals(Type.getDescriptor(VersionedMixin.class))) {
+                    String min = Annotations.getValue(node, "min", "");
+                    String max = Annotations.getValue(node, "max", "");
+                    String currentVersion = Platform.getVersion();
+                    ComparableVersion comparableVersion = new ComparableVersion(currentVersion);
+                    shouldApply = evaluateVersion(className, min, max, currentVersion, comparableVersion);
                 }
+                if(!shouldApply) break;
             }
             return shouldApply;
         } catch (ClassNotFoundException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private boolean evaluateVersion(String className, String min, String max, String currentVersion, ComparableVersion comparableVersion) {
+        boolean shouldApply = true;
+        if (!min.isBlank()) {
+            shouldApply &= comparableVersion.compareTo(new ComparableVersion(min)) >= 0;
+        }
+        if (!max.isBlank()) {
+            shouldApply &= comparableVersion.compareTo(new ComparableVersion(max)) <= 0;
+        }
+        LOGGER.debug("%s is %sbeing applied because we are using %s %s".formatted(className,
+                shouldApply ? "" : "not ",
+                Platform.getModLoader(),
+                currentVersion
+        ));
+        return shouldApply;
     }
 
     @Override
