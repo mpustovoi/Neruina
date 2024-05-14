@@ -13,9 +13,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.toast.SystemToast;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -270,35 +267,41 @@ public final class TickHandler {
     private void handleTickingPlayer(PlayerEntity player, Throwable e) {
         Neruina.LOGGER.warn("Neruina caught an exception, see below for cause", e);
         MinecraftServer server = player.getServer();
-        if (server == null || !server.isDedicated() && player.getWorld().isClient()) {
+        if(player instanceof ServerPlayerEntity serverPlayer) {
+            String name = player.getDisplayName() == null ? player.getName().getString() : player.getDisplayName().getString();
+            MessageHandler messageHandler = Neruina.getInstance().getMessageHandler();
+            Text message = messageHandler.formatText("neruina.ticking.player", name);
+            TickingEntry tickingEntry = new TickingEntry(player, false, player.getBlockPos(), e);
+            trackError(tickingEntry);
+            messageHandler.broadcastToPlayers(server, message, messageHandler.generateResourceActions(tickingEntry));
+            serverPlayer.networkHandler.disconnect(VersionedText.concat(VersionedText.translatable("neruina.kick.message"),
+                    VersionedText.translatable("neruina.kick.reason")
+            ));
+        } else if ((server == null || !server.isDedicated()) && player.getWorld().isClient()) {
             handleTickingClient(player, e);
-            return;
         }
-
-        ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
-        String name = player.getDisplayName() == null ? player.getName().getString() : player.getDisplayName().getString();
-        MessageHandler messageHandler = Neruina.getInstance().getMessageHandler();
-        Text message = messageHandler.formatText("neruina.ticking.player", name);
-        TickingEntry tickingEntry = new TickingEntry(player, false, player.getBlockPos(), e);
-        trackError(tickingEntry);
-        messageHandler.broadcastToPlayers(server, message, messageHandler.generateResourceActions(tickingEntry));
-        serverPlayer.networkHandler.disconnect(VersionedText.concat(VersionedText.translatable("neruina.kick.message"),
-                VersionedText.translatable("neruina.kick.reason")
-        ));
     }
 
     private void handleTickingClient(PlayerEntity clientPlayer, Throwable e) {
         Neruina.LOGGER.warn("Neruina caught an exception, see below for cause", e);
         clientPlayer.getWorld().disconnect();
-        MinecraftClient client = MinecraftClient.getInstance();
+        try {
+            Class<?> clazz = net.minecraft.client.MinecraftClient.class;
+            Neruina.LOGGER.debug("Validated On Client: %s".formatted(clazz));
+        } catch (NoClassDefFoundError ex) {
+            // Somehow got here when client is not running
+            Neruina.LOGGER.error("Client is not running, but caught a ticking exception on client?");
+            return;
+        }
+        net.minecraft.client.MinecraftClient client = net.minecraft.client.MinecraftClient.getInstance();
         /*? if >=1.19 {*/
         client.disconnect(new net.minecraft.client.gui.screen.MessageScreen(VersionedText.translatable("menu.savingLevel")));
         /*? } else {*//*
         client.disconnect(new net.minecraft.client.gui.screen.SaveLevelScreen(VersionedText.translatable("menu.savingLevel")));
         *//*? }*/
-        client.setScreen(new TitleScreen());
-        client.getToastManager().add(SystemToast.create(client,
-                SystemToast.Type.WORLD_ACCESS_FAILURE,
+        client.setScreen(new net.minecraft.client.gui.screen.TitleScreen());
+        client.getToastManager().add(net.minecraft.client.toast.SystemToast.create(client,
+                net.minecraft.client.toast.SystemToast.Type.WORLD_ACCESS_FAILURE,
                 VersionedText.translatable("neruina.toast.title"),
                 VersionedText.translatable("neruina.toast.desc")
         ));

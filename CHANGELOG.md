@@ -1,3 +1,11 @@
+# 2.0.0-beta.3
+
+- Fix crash on dedicated servers
+
+# 2.0.0-beta.2
+
+- Fix Command Permissions
+
 # 2.0.0
 ### Changes
 - Added NeoForge support
