@@ -2,8 +2,9 @@ package com.bawnorton.neruina.platform;
 
 import java.nio.file.Path;
 
-/*? if fabric {*/
+/*? if fabric {*//*
 import com.bawnorton.neruina.Neruina;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
@@ -52,8 +53,12 @@ public final class Platform {
     public static String getVersion() {
         return getModVersion("fabricloader");
     }
+
+    public static boolean isClient() {
+        return FabricLoader.getInstance().getEnvironmentType().equals(EnvType.CLIENT);
+    }
 }
-/*? } elif forge {*//*
+*//*? } elif forge {*//*
 import java.util.List;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -97,8 +102,12 @@ public final class Platform {
     public static String getVersion() {
         return FMLLoader.versionInfo().forgeVersion();
     }
+
+    public static boolean isClient() {
+        return FMLLoader.getDist().isClient();
+    }
 }
-*//*? } elif neoforge {*//*
+*//*? } elif neoforge {*/
 import java.util.List;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
@@ -141,5 +150,9 @@ public final class Platform {
     public static String getVersion() {
         return FMLLoader.versionInfo().neoForgeVersion();
     }
+
+    public static boolean isClient() {
+        return FMLLoader.getDist().isClient();
+    }
 }
-*//*? }*/
+/*? }*/

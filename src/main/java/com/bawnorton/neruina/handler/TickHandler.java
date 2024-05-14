@@ -7,12 +7,11 @@ import com.bawnorton.neruina.extend.Errorable;
 import com.bawnorton.neruina.extend.ErrorableBlockState;
 import com.bawnorton.neruina.handler.client.ClientTickHandler;
 import com.bawnorton.neruina.mixin.accessor.WorldChunkAccessor;
+import com.bawnorton.neruina.platform.Platform;
 import com.bawnorton.neruina.util.ErroredType;
 import com.bawnorton.neruina.util.TickingEntry;
 import com.bawnorton.neruina.version.VersionedText;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -285,9 +284,9 @@ public final class TickHandler {
         ));
     }
 
-    private void handleTickingClient(PlayerEntity clientPlayer, Throwable e) {
-        if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            ClientTickHandler.handleTickingClient(clientPlayer, e);
+    private void handleTickingClient(PlayerEntity player, Throwable e) {
+        if(player.getWorld().isClient() || Platform.isClient()) {
+            ClientTickHandler.handleTickingClient(player, e);
         } else {
             Neruina.LOGGER.error("Neruina caught an exception, but the player is not a server player, this should not happen. Behaviour is undefined.", e);
         }
