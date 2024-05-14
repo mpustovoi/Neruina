@@ -1,8 +1,6 @@
 package com.bawnorton.neruina.mixin.catchers;
 
 import com.bawnorton.neruina.Neruina;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -13,6 +11,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+/*? if >=1.20.2 {*/
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
+/*? }*/
 
 @Mixin(PlayerInventory.class)
 public abstract class PlayerInventoryMixin {

@@ -1,3 +1,7 @@
+# 2.0.0-beta.5
+
+- Migrate to custom_data component for persistence on item stacks
+
 # 2.0.0-beta.4
 
 - Add Russion Translations (mpustovoi)
