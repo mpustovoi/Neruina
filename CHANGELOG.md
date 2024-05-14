@@ -1,3 +1,8 @@
+# 2.0.0-beta.4
+
+- Add Russion Translations (mpustovoi)
+- Actually fix the crash on dedicated servers
+
 # 2.0.0-beta.3
 
 - Fix crash on dedicated servers

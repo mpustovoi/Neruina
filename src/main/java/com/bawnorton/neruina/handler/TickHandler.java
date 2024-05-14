@@ -5,11 +5,14 @@ import com.bawnorton.neruina.config.Config;
 import com.bawnorton.neruina.exception.TickingException;
 import com.bawnorton.neruina.extend.Errorable;
 import com.bawnorton.neruina.extend.ErrorableBlockState;
+import com.bawnorton.neruina.handler.client.ClientTickHandler;
 import com.bawnorton.neruina.mixin.accessor.WorldChunkAccessor;
 import com.bawnorton.neruina.util.ErroredType;
 import com.bawnorton.neruina.util.TickingEntry;
 import com.bawnorton.neruina.version.VersionedText;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -238,7 +241,11 @@ public final class TickHandler {
 
     private void handleTickingEntity(Entity entity, Throwable e) {
         if (entity instanceof PlayerEntity player) {
-            handleTickingPlayer(player, e);
+            if (player instanceof ServerPlayerEntity serverPlayer) {
+                handleTickingPlayer(serverPlayer, e);
+            } else {
+                handleTickingClient(player, e);
+            }
             return;
         }
 
@@ -264,47 +271,26 @@ public final class TickHandler {
         }
     }
 
-    private void handleTickingPlayer(PlayerEntity player, Throwable e) {
+    private void handleTickingPlayer(ServerPlayerEntity player, Throwable e) {
         Neruina.LOGGER.warn("Neruina caught an exception, see below for cause", e);
         MinecraftServer server = player.getServer();
-        if(player instanceof ServerPlayerEntity serverPlayer) {
-            String name = player.getDisplayName() == null ? player.getName().getString() : player.getDisplayName().getString();
-            MessageHandler messageHandler = Neruina.getInstance().getMessageHandler();
-            Text message = messageHandler.formatText("neruina.ticking.player", name);
-            TickingEntry tickingEntry = new TickingEntry(player, false, player.getBlockPos(), e);
-            trackError(tickingEntry);
-            messageHandler.broadcastToPlayers(server, message, messageHandler.generateResourceActions(tickingEntry));
-            serverPlayer.networkHandler.disconnect(VersionedText.concat(VersionedText.translatable("neruina.kick.message"),
-                    VersionedText.translatable("neruina.kick.reason")
-            ));
-        } else if ((server == null || !server.isDedicated()) && player.getWorld().isClient()) {
-            handleTickingClient(player, e);
-        }
+        String name = player.getDisplayName() == null ? player.getName().getString() : player.getDisplayName().getString();
+        MessageHandler messageHandler = Neruina.getInstance().getMessageHandler();
+        Text message = messageHandler.formatText("neruina.ticking.player", name);
+        TickingEntry tickingEntry = new TickingEntry(player, false, player.getBlockPos(), e);
+        trackError(tickingEntry);
+        messageHandler.broadcastToPlayers(server, message, messageHandler.generateResourceActions(tickingEntry));
+        player.networkHandler.disconnect(VersionedText.concat(VersionedText.translatable("neruina.kick.message"),
+                VersionedText.translatable("neruina.kick.reason")
+        ));
     }
 
     private void handleTickingClient(PlayerEntity clientPlayer, Throwable e) {
-        Neruina.LOGGER.warn("Neruina caught an exception, see below for cause", e);
-        clientPlayer.getWorld().disconnect();
-        try {
-            Class<?> clazz = net.minecraft.client.MinecraftClient.class;
-            Neruina.LOGGER.debug("Validated On Client: %s".formatted(clazz));
-        } catch (NoClassDefFoundError ex) {
-            // Somehow got here when client is not running
-            Neruina.LOGGER.error("Client is not running, but caught a ticking exception on client?");
-            return;
+        if(FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            ClientTickHandler.handleTickingClient(clientPlayer, e);
+        } else {
+            Neruina.LOGGER.error("Neruina caught an exception, but the player is not a server player, this should not happen. Behaviour is undefined.", e);
         }
-        net.minecraft.client.MinecraftClient client = net.minecraft.client.MinecraftClient.getInstance();
-        /*? if >=1.19 {*/
-        client.disconnect(new net.minecraft.client.gui.screen.MessageScreen(VersionedText.translatable("menu.savingLevel")));
-        /*? } else {*//*
-        client.disconnect(new net.minecraft.client.gui.screen.SaveLevelScreen(VersionedText.translatable("menu.savingLevel")));
-        *//*? }*/
-        client.setScreen(new net.minecraft.client.gui.screen.TitleScreen());
-        client.getToastManager().add(net.minecraft.client.toast.SystemToast.create(client,
-                net.minecraft.client.toast.SystemToast.Type.WORLD_ACCESS_FAILURE,
-                VersionedText.translatable("neruina.toast.title"),
-                VersionedText.translatable("neruina.toast.desc")
-        ));
     }
 
     private void trackError(TickingEntry entry) {

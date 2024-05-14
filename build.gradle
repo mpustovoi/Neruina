@@ -102,6 +102,11 @@ loom {
 			ideConfigGenerated = true
 			runDir = "../../run"
 		}
+
+		server {
+			ideConfigGenerated = true
+			runDir = "../../run"
+		}
 	}
 }
 
@@ -147,7 +152,8 @@ if(isForge && project_name.contains("1.20")) {
 
 publishMods {
 	file = tasks.remapJar.archiveFile
-	changelog = "[Changelog](https://github.com/Bawnorton/Neruina/releases/tag/%s)".formatted(mod_version)
+	def tag = "$mod_loader-$mod_version+$minecraft_version"
+	changelog = "[Changelog](https://github.com/Bawnorton/Neruina/releases/tag/%s)".formatted(tag)
 	displayName = "$mod_name ${mod_loader.capitalize()} $mod_version for $minecraft_version"
 	type = STABLE
 	version = mod_version
@@ -160,7 +166,7 @@ publishMods {
 		repository = "Bawnorton/Neruina"
 		commitish = "stonecutter"
 		changelog = getRootProject().file("CHANGELOG.md").readLines().join("\n")
-		tagName = "$mod_loader-$mod_version+$minecraft_version"
+		tagName = tag
 	}
 
 	modrinth {
