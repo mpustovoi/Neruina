@@ -1,6 +1,6 @@
 plugins {
 	id 'dev.architectury.loom' version "1.6-SNAPSHOT"
-	id 'me.modmuss50.mod-publish-plugin' version "0.4.+"
+	id 'me.modmuss50.mod-publish-plugin' version "0.5.+"
 }
 
 def project_name = loom.project.name as String
@@ -11,6 +11,8 @@ def mod_loader = isFabric ? "fabric" : isForge ? "forge" : isNeoForge ? "neoforg
 def java_version = project.deps_java as int
 def minecraft_version = project.deps_minecraft
 def minecraft_dependency = project.mod_minecraft_dependency
+def minecraft_min_version = project.mod_min_minecraft_version
+def minecraft_max_version = project.mod_max_minecraft_version
 def loader_version = isForge ? project.deps_fml : isNeoForge ? project.deps_neoforge : project.deps_fabric_loader
 def mod_id = project.mod_id
 def mod_name = project.mod_name
@@ -156,7 +158,6 @@ publishMods {
 	changelog = "[Changelog](https://github.com/Bawnorton/Neruina/releases/tag/%s)".formatted(tag)
 	displayName = "$mod_name ${mod_loader.capitalize()} $mod_version for $minecraft_version"
 	type = STABLE
-	version = mod_version
 	modLoaders.add(mod_loader)
 
 	dryRun = false
@@ -172,7 +173,14 @@ publishMods {
 	modrinth {
 		accessToken = providers.gradleProperty("MODRINTH_TOKEN")
 		projectId = "1s5x833P"
-		minecraftVersions.add(minecraft_version)
+		if(minecraft_min_version == minecraft_max_version) {
+			minecraftVersions.add(minecraft_min_version)
+		} else {
+			minecraftVersionRange {
+				start = minecraft_min_version
+				end = minecraft_max_version
+			}
+		}
 		if(isFabric) {
 			requires {
 				slug = "fabric-api"
@@ -183,7 +191,14 @@ publishMods {
 	curseforge {
 		accessToken = providers.gradleProperty("CURSEFORGE_TOKEN")
 		projectId = "851046"
-		minecraftVersions.add(minecraft_version)
+		if(minecraft_min_version == minecraft_max_version) {
+			minecraftVersions.add(minecraft_min_version)
+		} else {
+			minecraftVersionRange {
+				start = minecraft_min_version
+				end = minecraft_max_version
+			}
+		}
 		if(isFabric) {
 			requires {
 				slug = "fabric-api"

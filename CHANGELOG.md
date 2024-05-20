@@ -1,3 +1,12 @@
+# 2.0.0-beta.7
+
+- Add 1.19.1-1.19.2 jar
+- Fix 1.19.1/2 compat
+
+# 2.0.0-beta.6
+
+- Fix minecraft version deps on published builds
+
 # 2.0.0-beta.5
 
 - Migrate to custom_data component for persistence on item stacks
