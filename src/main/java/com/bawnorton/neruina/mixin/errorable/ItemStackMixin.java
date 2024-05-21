@@ -14,26 +14,26 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.UUID;
 
-/*? if >=1.20.2 {*/
+/*? if >=1.20.2 {*//*
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.component.ComponentMapImpl;
-/*? }*/
+*//*? }*/
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin implements Errorable {
-    /*? if >=1.20.2 {*/
+    /*? if >=1.20.2 {*//*
     @Shadow @Final
     ComponentMapImpl components;
-    /*? } else {*//*
+    *//*? } else {*/
     @Shadow public abstract NbtCompound getOrCreateNbt();
 
     @Shadow @Nullable
     public abstract NbtCompound getNbt();
 
     @Shadow public abstract boolean hasNbt();
-    *//*? }*/
+    /*? }*/
 
     @Unique
     private boolean neruina$errored = false;
@@ -69,7 +69,7 @@ public abstract class ItemStackMixin implements Errorable {
         return neruina$tickingEntryId;
     }
 
-    /*? if >=1.20.2 {*/
+    /*? if >=1.20.2 {*//*
     @Unique
     private void neruina$updateData() {
         NbtCompound nbt = new NbtCompound();
@@ -93,7 +93,7 @@ public abstract class ItemStackMixin implements Errorable {
             neruina$tickingEntryId = tag.getUuid("neruina$tickingEntryId");
         }
     }
-    /*? } else {*//*
+    *//*? } else {*/
     @Unique
     private void neruina$updateData() {
         NbtCompound nbt = getOrCreateNbt();
@@ -121,5 +121,5 @@ public abstract class ItemStackMixin implements Errorable {
             }
         }
     }
-    *//*? }*/
+    /*? }*/
 }

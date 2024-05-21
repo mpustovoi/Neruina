@@ -155,7 +155,7 @@ if(isForge && project_name.contains("1.20")) {
 publishMods {
 	file = tasks.remapJar.archiveFile
 	def tag = "$mod_loader-$mod_version+$minecraft_version"
-	changelog = "[Changelog](https://github.com/Bawnorton/Neruina/releases/tag/%s)".formatted(tag)
+	changelog = "[Changelog](https://github.com/Bawnorton/Neruina/blob/stonecutter/CHANGELOG.md)"
 	displayName = "$mod_name ${mod_loader.capitalize()} $mod_version for $minecraft_version"
 	type = STABLE
 	modLoaders.add(mod_loader)

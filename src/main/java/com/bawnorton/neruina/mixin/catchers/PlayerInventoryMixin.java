@@ -12,10 +12,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/*? if >=1.20.2 {*/
+/*? if >=1.20.2 {*//*
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
-/*? }*/
+*//*? }*/
 
 @Mixin(PlayerInventory.class)
 public abstract class PlayerInventoryMixin {
@@ -23,7 +23,7 @@ public abstract class PlayerInventoryMixin {
 
     @Inject(method = "readNbt", at = @At("TAIL"))
     private void removeErroredStatusOnInvInit(CallbackInfo ci) {
-        /*? if >=1.20.2 {*/
+        /*? if >=1.20.2 {*//*
         main.forEach(stack -> {
             NbtComponent component = stack.get(DataComponentTypes.CUSTOM_DATA);
             if (component == null) return;
@@ -33,7 +33,7 @@ public abstract class PlayerInventoryMixin {
                 Neruina.getInstance().getTickHandler().removeErrored(stack);
             }
         });
-        /*? } else {*//*
+        *//*? } else {*/
         main.forEach(stack -> {
             if(stack.hasNbt()) {
                 NbtCompound nbt = stack.getNbt();
@@ -42,6 +42,6 @@ public abstract class PlayerInventoryMixin {
                 }
             }
         });
-        *//*? }*/
+        /*? }*/
     }
 }

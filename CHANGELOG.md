@@ -1,3 +1,11 @@
+# 2.0.0-beta.9
+
+- Fix 1.19.2 on dedicated servers
+
+# 2.0.0-beta.8
+
+- Recompile of .7 as published versions had corruption ... I have no idea how
+
 # 2.0.0-beta.7
 
 - Add 1.19.1-1.19.2 jar
