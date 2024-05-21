@@ -63,6 +63,7 @@ dependencies {
 	implementation(include("com.fasterxml.jackson.core:jackson-core:${project.deps_jackson}"))
 	implementation(include("com.fasterxml.jackson.core:jackson-databind:${project.deps_jackson}"))
 	implementation(include("com.fasterxml.jackson.core:jackson-annotations:${project.deps_jackson}"))
+	implementation(include"com.google.code.gson:gson:${project.deps_gson}")
 
 	if(isFabric) {
 		modImplementation("net.fabricmc:fabric-loader:${project.deps_fabric_loader}")

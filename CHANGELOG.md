@@ -1,3 +1,7 @@
+# 2.0.0-beta.10
+
+- Bundle gson 2.11 to allow for record serialization in 1.19.2 and below
+
 # 2.0.0-beta.9
 
 - Fix 1.19.2 on dedicated servers
