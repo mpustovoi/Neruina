@@ -74,6 +74,7 @@
   "commands.neruina.id.tooltip": "Click to copy to clipboard.",
   "commands.neruina.id.entity.not_errored": "%s is not errored.",
   "commands.neruina.id.block.not_errored": "Block [%s] at (%s) is not errored.",
+  "commands.neruina.id.item_stack.not_errored": "%s's held Item Stack [%s] is not errored.",
   "commands.neruina.info.entity": "Entity [%s] at (%s) is suspended.",
   "commands.neruina.info.block_entity": "Block [%s] at (%s) is suspended.",
   "commands.neruina.info.item_stack": "Item Stack [%s] is suspended.",

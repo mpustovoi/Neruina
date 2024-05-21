@@ -1,6 +1,7 @@
 # 2.0.0-beta.10
 
-- Bundle gson 2.11 to allow for record serialization in 1.19.2 and below
+- Downgrade records in 1.19.2 and below to allow java 6 gson to serialize them
+- Fix missing translation for item stack error id not found
 
 # 2.0.0-beta.9
 
