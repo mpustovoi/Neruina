@@ -36,8 +36,8 @@ public final class PersitanceHandler extends PersistentState {
         PersistentStateManager manager = world.getPersistentStateManager();
         /*? if >=1.20.2 {*/
         PersitanceHandler handler = manager.getOrCreate(type, Neruina.MOD_ID);
-        /*?} else {*//*
-        PersitanceHandler handler = manager.getOrCreate(PersitanceHandler::fromNbtInternal, PersitanceHandler::new, Neruina.MOD_ID);
+        /*?} else {*/
+        /*PersitanceHandler handler = manager.getOrCreate(PersitanceHandler::fromNbtInternal, PersitanceHandler::new, Neruina.MOD_ID);
         *//*?}*/
         handler.markDirty();
         return handler;

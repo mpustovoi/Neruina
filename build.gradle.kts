@@ -9,11 +9,11 @@ plugins {
 }
 
 class ModData {
-    val id = property("mod_id")
-    val name = property("mod_name")
-    val version = property("mod_version")
-    val group = property("mod_group")!!
-    val minecraftDependency = property("minecraft_dependency")!!
+    val id = property("mod_id").toString()
+    val name = property("mod_name").toString()
+    val version = property("mod_version").toString()
+    val group = property("mod_group").toString()
+    val minecraftDependency = property("minecraft_dependency").toString()
     val minSupportedVersion = property("mod_min_supported_version").toString()
     val maxSupportedVersion = property("mod_max_supported_version").toString()
 }
@@ -62,6 +62,7 @@ val minecraftVersion = MinecraftVersionData()
 
 version = "${mod.version}+$minecraftVersion"
 group = mod.group
+base.archivesName.set(mod.name)
 
 repositories {
     mavenCentral()

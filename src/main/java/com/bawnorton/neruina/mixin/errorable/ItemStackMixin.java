@@ -26,8 +26,8 @@ public abstract class ItemStackMixin implements Errorable {
     /*? if >=1.20.2 {*/
     @Shadow @Final
     ComponentMapImpl components;
-    /*?} else {*//*
-    @Shadow public abstract NbtCompound getOrCreateNbt();
+    /*?} else {*/
+    /*@Shadow public abstract NbtCompound getOrCreateNbt();
 
     @Shadow @Nullable
     public abstract NbtCompound getNbt();
@@ -93,8 +93,8 @@ public abstract class ItemStackMixin implements Errorable {
             neruina$tickingEntryId = tag.getUuid("neruina$tickingEntryId");
         }
     }
-    /*?} else {*//*
-    @Unique
+    /*?} else {*/
+    /*@Unique
     private void neruina$updateData() {
         NbtCompound nbt = getOrCreateNbt();
         if (neruina$errored) {

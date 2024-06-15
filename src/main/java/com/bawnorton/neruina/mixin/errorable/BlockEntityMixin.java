@@ -46,8 +46,8 @@ public abstract class BlockEntityMixin implements Errorable {
     @Inject(method = "writeNbt", at = @At("HEAD"))
     /*? if >=1.20.2 {*/
     private void writeErroredToNbt(NbtCompound nbt, net.minecraft.registry.RegistryWrapper.WrapperLookup registryLookup, CallbackInfo ci) {
-    /*?} else {*//*
-    private void writeErroredToNbt(NbtCompound nbt, CallbackInfo ci) {
+    /*?} else {*/
+    /*private void writeErroredToNbt(NbtCompound nbt, CallbackInfo ci) {
     *//*?}*/
         if (neruina$errored) {
             nbt.putBoolean("neruina$errored", true);
@@ -60,8 +60,8 @@ public abstract class BlockEntityMixin implements Errorable {
     @Inject(method = "readNbt", at = @At("TAIL"))
     /*? if >=1.20.2 {*/
     private void readErroredFromNbt(NbtCompound nbt, net.minecraft.registry.RegistryWrapper.WrapperLookup registryLookup, CallbackInfo ci) {
-    /*?} else {*//*
-    private void readErroredFromNbt(NbtCompound nbt, CallbackInfo ci) {
+    /*?} else {*/
+    /*private void readErroredFromNbt(NbtCompound nbt, CallbackInfo ci) {
     *//*?}*/
         if (nbt.contains("neruina$errored")) {
             neruina$errored = nbt.getBoolean("neruina$errored");

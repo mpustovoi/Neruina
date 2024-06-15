@@ -33,8 +33,8 @@ public abstract class PlayerInventoryMixin {
                 Neruina.getInstance().getTickHandler().removeErrored(stack);
             }
         });
-        /*?} else {*//*
-        main.forEach(stack -> {
+        /*?} else {*/
+        /*main.forEach(stack -> {
             if(stack.hasNbt()) {
                 NbtCompound nbt = stack.getNbt();
                 if(nbt.getBoolean("neruina$errored")) {

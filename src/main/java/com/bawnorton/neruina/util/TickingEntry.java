@@ -13,7 +13,6 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
-import net.minecraft.util.crash.ReportType;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
@@ -21,6 +20,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.CodeSource;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -35,6 +35,10 @@ public final class TickingEntry {
     private final UUID uuid;
     private String cachedCauseType;
     private String cachedCauseName;
+
+    private final List<String> blacklistedModids = List.of(
+            Neruina.MOD_ID, "minecraft", "forge", "neoforge"
+    );
 
     public TickingEntry(Object cause, boolean persitent, BlockPos pos, Throwable error) {
         this.causeSupplier = () -> cause;
@@ -78,7 +82,7 @@ public final class TickingEntry {
         populate(section);
         return report.asString(
             //? if >=1.20.7
-            ReportType.MINECRAFT_CRASH_REPORT
+            /*net.minecraft.util.crash.ReportType.MINECRAFT_CRASH_REPORT*/
         );
     }
 
@@ -141,7 +145,7 @@ public final class TickingEntry {
                 modids.add(modidFromResource);
             }
         }
-        modids.removeIf(modid -> modid.equals(Neruina.MOD_ID) || modid.equals("minecraft"));
+        blacklistedModids.forEach(modids::remove);
         return modids;
     }
 
@@ -149,7 +153,6 @@ public final class TickingEntry {
         MixinMerged annotation;
         Method method = Reflection.findMethod(clazz, methodName);
         if (method == null) return null;
-
         if (!method.isAnnotationPresent(MixinMerged.class)) return null;
 
         annotation = method.getAnnotation(MixinMerged.class);
@@ -164,14 +167,12 @@ public final class TickingEntry {
     @Nullable
     private static String modidFromResource(URL resource) {
         String location = resource.getPath();
-        int index = location.indexOf("!");
+        int index = location.indexOf("jar");
         if (index != -1) {
-            location = location.substring(0, index);
-            if (location.endsWith(".jar")) {
-                String[] parts = location.split("/");
-                String jarName = parts[parts.length - 1];
-                return Platform.modidFromJar(jarName);
-            }
+            location = location.substring(0, index + "jar".length());
+            String[] parts = location.split("/");
+            String jarName = parts[parts.length - 1];
+            return Platform.modidFromJar(jarName);
         }
         return null;
     }

@@ -1,9 +1,11 @@
 package com.bawnorton.neruina.platform;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 /*? if fabric {*/
-import com.bawnorton.neruina.Neruina;
+/*import com.bawnorton.neruina.Neruina;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -58,8 +60,8 @@ public final class Platform {
         return FabricLoader.getInstance().getEnvironmentType().equals(EnvType.CLIENT);
     }
 }
-/*?} elif forge {*//*
-import java.util.List;
+*//*?} elif forge {*/
+/*import java.util.List;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -88,7 +90,18 @@ public final class Platform {
 
     public static String modidFromJar(String jarName) {
         for (IModInfo mod : ModList.get().getMods()) {
-            if (mod.getOwningFile().getFile().getFilePath().endsWith(jarName)) {
+            String modLocation = mod.getOwningFile()
+                    .getFile()
+                    .getFilePath()
+                    .toString()
+                    .replace("+", " ");
+
+            String decodedJarName = URLDecoder.decode(jarName, StandardCharsets.UTF_8);
+            int hashIndex = decodedJarName.lastIndexOf("#");
+            if (hashIndex != -1) {
+                decodedJarName = decodedJarName.substring(0, hashIndex);
+            }
+            if (modLocation.endsWith(decodedJarName)) {
                 return mod.getModId();
             }
         }
@@ -107,7 +120,7 @@ public final class Platform {
         return FMLLoader.getDist().isClient();
     }
 }
-*//*?} elif neoforge {*//*
+*//*?} elif neoforge {*/
 import java.util.List;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
@@ -136,7 +149,18 @@ public final class Platform {
 
     public static String modidFromJar(String jarName) {
         for (ModInfo mod : LoadingModList.get().getMods()) {
-            if (mod.getOwningFile().getFile().getFilePath().endsWith(jarName)) {
+            String modLocation = mod.getOwningFile()
+                    .getFile()
+                    .getFilePath()
+                    .toString()
+                    .replace("+", " ");
+
+            String decodedJarName = URLDecoder.decode(jarName, StandardCharsets.UTF_8);
+            int hashIndex = decodedJarName.lastIndexOf("#");
+            if (hashIndex != -1) {
+                decodedJarName = decodedJarName.substring(0, hashIndex);
+            }
+            if (modLocation.endsWith(decodedJarName)) {
                 return mod.getModId();
             }
         }
@@ -155,4 +179,4 @@ public final class Platform {
         return FMLLoader.getDist().isClient();
     }
 }
-*//*?}*/
+/*?}*/

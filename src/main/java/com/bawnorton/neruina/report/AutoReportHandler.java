@@ -83,7 +83,6 @@ public final class AutoReportHandler {
 
         GitHub github = result.getFirst();
 
-        entry.findPotentialSources();
         reportedEntries.add(entryId);
         Set<String> modids = entry.findPotentialSources();
         Map<String, @Nullable GHIssueBuilder> issueBuilders = new HashMap<>();

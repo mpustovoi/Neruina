@@ -3,7 +3,6 @@ package com.bawnorton.neruina.report;
 import com.bawnorton.neruina.platform.Platform;
 import com.bawnorton.neruina.util.TickingEntry;
 import net.minecraft.SharedConstants;
-import net.minecraft.util.crash.ReportType;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.github.GHGist;
 import org.kohsuke.github.GitHub;
@@ -45,7 +44,7 @@ public class IssueFormatter {
         - Minecraft Version: <mcversion>
         - Mod Loader: <modloader>
         - Mod Version: <modversion>
-            
+        
         ## Report:
         <details>
         <summary>Generated Crash Report</summary>
