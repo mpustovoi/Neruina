@@ -12,17 +12,17 @@ public interface VersionedText {
     static Text literal(String text) {
         /*? if >=1.19 {*/
         return Text.literal(text);
-        /*? } else { *//*
+        /*?} else {*//*
         return new LiteralText(text);
-        *//*? } */
+        *//*?}*/
     }
 
     static Text translatable(String key, Object... args) {
         /*? if >=1.19 {*/
         return Text.translatable(key, args);
-        /*? } else { *//*
+        /*?} else {*//*
         return new TranslatableText(key, args);
-        *//*? } */
+        *//*?}*/
     }
 
     static Text withStyle(Text text, UnaryOperator<Style> style) {
@@ -35,9 +35,9 @@ public interface VersionedText {
     static Text concat(Text... texts) {
         /*? if >=1.19 {*/
         MutableText text = Text.empty();
-        /*? } else { *//*
+        /*?} else {*//*
         MutableText text = new LiteralText("");
-        *//*? } */
+        *//*?}*/
         for (Text t : texts) {
             text.append(t);
         }
@@ -47,9 +47,9 @@ public interface VersionedText {
     static Text concatDelimited(Text delimiter, Text... texts) {
         /*? if >=1.19 {*/
         MutableText text = Text.empty();
-        /*? } else { *//*
+        /*?} else {*//*
         MutableText text = new LiteralText("");
-        *//*? } */
+        *//*?}*/
         for (int i = 0; i < texts.length; i++) {
             text.append(texts[i]);
             if(texts[i].getString().isEmpty()) {
@@ -65,9 +65,9 @@ public interface VersionedText {
     static Text pad(Text text) {
         /*? if >=1.19 {*/
         MutableText padded = Text.empty();
-        /*? } else { *//*
+        /*?} else {*//*
         MutableText padded = new LiteralText("");
-        *//*? } */
+        *//*?}*/
         padded.append(LINE_BREAK);
         padded.append(text);
         padded.append(LINE_BREAK);

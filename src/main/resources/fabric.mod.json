@@ -24,7 +24,7 @@
     "neruina.mixins.json"
   ],
   "depends": {
-    "minecraft": "${minecraft_version}",
+    "minecraft": "${minecraft_dependency}",
     "fabricloader": ">=0.15.0"
   },
   "breaks": {

@@ -1,3 +1,9 @@
+# 2.1.0
+
+- Add Minecraft 1.21 support
+- Migrate gradle to kotlin dsl
+- Update stonecutter to 0.4
+
 # 2.0.0-beta.10
 
 - Downgrade records in 1.19.2 and below to allow java 6 gson to serialize them

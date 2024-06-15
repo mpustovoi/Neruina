@@ -489,8 +489,8 @@ public final class NeruinaCommandHandler {
 
     private static void sendFeedback(CommandContext<ServerCommandSource> context, Text text) {
         context.getSource().sendFeedback(
-                /*? if >=1.20 */
-                /*() ->*/
+                /*? if >=1.20*/
+                () ->
                 text,
                 true
         );
