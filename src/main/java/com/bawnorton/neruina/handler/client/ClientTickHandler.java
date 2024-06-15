@@ -14,9 +14,9 @@ public class ClientTickHandler {
         MinecraftClient client = MinecraftClient.getInstance();
         /*? if >=1.19 {*/
         client.disconnect(new net.minecraft.client.gui.screen.MessageScreen(VersionedText.translatable("menu.savingLevel")));
-        /*? } else {*//*
+        /*?} else {*//*
         client.disconnect(new net.minecraft.client.gui.screen.SaveLevelScreen(VersionedText.translatable("menu.savingLevel")));
-        *//*? }*/
+        *//*?}*/
         client.setScreen(new TitleScreen());
         client.getToastManager().add(SystemToast.create(client,
                 SystemToast.Type.WORLD_ACCESS_FAILURE,

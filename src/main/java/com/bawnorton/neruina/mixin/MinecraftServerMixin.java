@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
-    /*? if >=1.19.3 {*//*
+    /*? if >=1.19.3 {*/
     @Inject(method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;createMetadata()Lnet/minecraft/server/ServerMetadata;", ordinal = 0))
     private void onServerStart(CallbackInfo ci) {
         Neruina.getInstance().getAutoReportHandler().init((MinecraftServer) (Object) this);
@@ -18,7 +18,7 @@ public abstract class MinecraftServerMixin {
         Neruina.getInstance().getPersitanceHandler((MinecraftServer) (Object) this);
         Storage.init((MinecraftServer) (Object) this);
     }
-    *//*? } elif >=1.19 {*/
+    /*?} elif >=1.19 {*//*
     @Inject(method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;setFavicon(Lnet/minecraft/server/ServerMetadata;)V", ordinal = 0))
     private void onServerStart(CallbackInfo ci) {
         Neruina.getInstance().getAutoReportHandler().init((MinecraftServer) (Object) this);
@@ -26,13 +26,13 @@ public abstract class MinecraftServerMixin {
         Neruina.getInstance().getPersitanceHandler((MinecraftServer) (Object) this);
         Storage.init((MinecraftServer) (Object) this);
     }
-    /*? } else {*//*
+    *//*?} else {*//*
     @Inject(method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;setFavicon(Lnet/minecraft/server/ServerMetadata;)V", ordinal = 0))
     private void onServerStart(CallbackInfo ci) {
         Neruina.getInstance().getTickHandler().init();
         Neruina.getInstance().getPersitanceHandler((MinecraftServer) (Object) this);
     }
-    *//*? }*/
+    *//*?}*/
 
     @Inject(method = "shutdown", at = @At("HEAD"))
     private void onServerStop(CallbackInfo ci) {

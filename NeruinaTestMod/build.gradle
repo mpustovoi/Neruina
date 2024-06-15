@@ -9,8 +9,7 @@ def isNeoForge = project_name.contains("neoforge")
 def isForge = project_name.contains("forge") && !isNeoForge
 def mod_loader = isFabric ? "fabric" : isForge ? "forge" : isNeoForge ? "neoforge" : null
 def java_version = project.deps_java as int
-def minecraft_version = project.deps_minecraft
-def minecraft_dependency = project.mod_minecraft_dependency
+def minecraft_version = project.def minecraft_dependency = project.minecraft_dependency
 def loader_version = isForge ? project.deps_fml : isNeoForge ? project.deps_neoforge : project.deps_fabric_loader
 def mod_id = project.mod_id
 def mod_name = project.mod_name
@@ -50,16 +49,16 @@ dependencies {
 
 	if(isNeoForge) {
 		mappings loom.layered {
-			it.mappings("net.fabricmc:yarn:$minecraft_version+build.${project.deps_yarn_build}:v2")
+			it.mappings("net.fabricmc:yarn:$minecraft_version+build.${project.yarn_build}:v2")
 			it.mappings(getRootProject().file("mappings/fix.tiny"))
 		}
 	} else {
-		mappings "net.fabricmc:yarn:$minecraft_version+build.${project.deps_yarn_build}:v2"
+		mappings "net.fabricmc:yarn:$minecraft_version+build.${project.yarn_build}:v2"
 	}
 
 	if(isFabric) {
 		modImplementation "net.fabricmc:fabric-loader:${project.deps_fabric_loader}"
-		modImplementation "net.fabricmc.fabric-api:fabric-api:${project.deps_fabric_api}"
+		modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
 	} else if (isForge) {
 		forge "net.minecraftforge:forge:$minecraft_version-${project.deps_fml}"
 		annotationProcessor compileOnly("io.github.llamalad7:mixinextras-common:${project.deps_mixin_extras}")

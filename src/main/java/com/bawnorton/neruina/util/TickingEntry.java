@@ -13,6 +13,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
+import net.minecraft.util.crash.ReportType;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
@@ -71,11 +72,14 @@ public final class TickingEntry {
         }
     }
 
-    public CrashReport createCrashReport() {
+    public String createCrashReport() {
         CrashReport report = new CrashReport("Ticking %s".formatted(getCauseType()), error);
         CrashReportSection section = report.addElement("Source: %s".formatted(getCauseName()));
         populate(section);
-        return report;
+        return report.asString(
+            //? if >=1.20.7
+            ReportType.MINECRAFT_CRASH_REPORT
+        );
     }
 
     public Object getCause() {

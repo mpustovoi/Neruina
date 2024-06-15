@@ -3,9 +3,9 @@ package com.bawnorton.neruina.report;
 import com.bawnorton.neruina.platform.Platform;
 import com.bawnorton.neruina.util.TickingEntry;
 import net.minecraft.SharedConstants;
+import net.minecraft.util.crash.ReportType;
 import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.github.GHGist;
-import org.kohsuke.github.GHGistBuilder;
 import org.kohsuke.github.GitHub;
 import java.text.DateFormat;
 import java.util.Date;
@@ -15,10 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public class IssueFormatter {
@@ -36,7 +33,7 @@ public class IssueFormatter {
             new Placeholder("modloader", true, Restriction.NONE, (config, entry) -> Platform.getModLoader().name().toLowerCase(Locale.ROOT)),
             new Placeholder("modversion", false, Restriction.NONE, (config, entry) -> Platform.getModVersion(config.modid())),
             new Placeholder("mcversion", false, Restriction.NONE, (config, entry) -> SharedConstants.getGameVersion().getName()),
-            new Placeholder("report", false, Restriction.BODY, (config, entry) -> "```\n%s\n```".formatted(entry.createCrashReport().asString()))
+            new Placeholder("report", false, Restriction.BODY, (config, entry) -> "```\n%s\n```".formatted(entry.createCrashReport()))
     );
 
     private static final String DEFAULT_TITLE = "[Neruina]: Ticking Exception Auto Report (<date> - <time>)";
@@ -105,7 +102,7 @@ public class IssueFormatter {
         String unverifiedBody = replacePlaceholders(rawBody, Restriction.BODY, entry);
         if (unverifiedBody.length() < 65536) return unverifiedBody;
 
-        String crashReport = "```\n%s\n```".formatted(entry.createCrashReport().asString());
+        String crashReport = "```\n%s\n```".formatted(entry.createCrashReport());
         GHGist gist = gists.computeIfAbsent(entry.uuid(), uuid -> {
             try {
                 return github.createGist()

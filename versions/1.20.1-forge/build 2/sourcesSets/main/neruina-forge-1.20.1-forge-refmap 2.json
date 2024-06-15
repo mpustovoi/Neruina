@@ -1,0 +1,166 @@
+{
+  "mappings": {
+    "com/bawnorton/neruina/mixin/catchers/WorldMixin": {
+      "tickEntity": "Lnet/minecraft/world/level/Level;m_46653_(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V",
+      "shouldUpdatePostDeath": "Lnet/minecraft/world/level/Level;m_183599_(Lnet/minecraft/world/entity/Entity;)Z"
+    },
+    "com/bawnorton/neruina/mixin/catchers/ServerPlayNetworkHandlerMixin": {
+      "tick": "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;m_9933_()V",
+      "Lnet/minecraft/server/network/ServerPlayerEntity;playerTick()V": "Lnet/minecraft/server/level/ServerPlayer;m_9240_()V"
+    },
+    "com/bawnorton/neruina/mixin/errorable/ItemStackMixin": {
+      "<init>(Lnet/minecraft/nbt/NbtCompound;)V": "Lnet/minecraft/world/item/ItemStack;<init>(Lnet/minecraft/nbt/CompoundTag;)V"
+    },
+    "com/bawnorton/neruina/mixin/errorable/EntityMixin": {
+      "writeNbt": "Lnet/minecraft/world/entity/Entity;m_20240_(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;",
+      "isInvulnerableTo": "Lnet/minecraft/world/entity/Entity;m_6673_(Lnet/minecraft/world/damagesource/DamageSource;)Z",
+      "Lnet/minecraft/entity/Entity;onGround:Z": "Lnet/minecraft/world/entity/Entity;f_19861_:Z",
+      "readNbt": "Lnet/minecraft/world/entity/Entity;m_20258_(Lnet/minecraft/nbt/CompoundTag;)V"
+    },
+    "com/bawnorton/neruina/mixin/compat/doespotatotick/WorldMixin": {
+      "tickEntity": "Lnet/minecraft/world/level/Level;m_46653_(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V",
+      "shouldUpdatePostDeath": "Lnet/minecraft/world/level/Level;m_183599_(Lnet/minecraft/world/entity/Entity;)Z"
+    },
+    "com/bawnorton/neruina/mixin/PlayerManagerMixin": {
+      "onPlayerConnect": "Lnet/minecraft/server/players/PlayerList;m_11261_(Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;)V"
+    },
+    "com/bawnorton/neruina/mixin/catchers/WorldChunkMixin": {
+      "removeBlockEntity": "Lnet/minecraft/world/level/chunk/LevelChunk;m_8114_(Lnet/minecraft/core/BlockPos;)V"
+    },
+    "com/bawnorton/neruina/mixin/compat/itshallnottick/WorldMixin": {
+      "Lnet/minecraft/entity/TickOptimizer;entityTicking(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;Lnet/minecraft/world/World;Lnet/minecraft/util/math/random/Random;)V": "Lnet/minecraft/entity/TickOptimizer;entityTicking(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/Level;Lnet/minecraft/util/RandomSource;)V",
+      "tickEntity": "Lnet/minecraft/world/level/Level;m_46653_(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V",
+      "shouldUpdatePostDeath": "Lnet/minecraft/world/level/Level;m_183599_(Lnet/minecraft/world/entity/Entity;)Z"
+    },
+    "com/bawnorton/neruina/mixin/MinecraftServerMixin": {
+      "Lnet/minecraft/server/MinecraftServer;createMetadata()Lnet/minecraft/server/ServerMetadata;": "Lnet/minecraft/server/MinecraftServer;m_271988_()Lnet/minecraft/network/protocol/status/ServerStatus;",
+      "runServer": "Lnet/minecraft/server/MinecraftServer;m_130011_()V",
+      "shutdown": "Lnet/minecraft/server/MinecraftServer;m_7041_()V"
+    },
+    "com/bawnorton/neruina/mixin/catchers/forge/PlayerInventory47220Mixin": {
+      "Lnet/minecraft/item/ItemStack;onInventoryTick(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;II)V": "Lnet/minecraft/world/item/ItemStack;onInventoryTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;II)V",
+      "updateItems": "Lnet/minecraft/world/entity/player/Inventory;m_36068_()V"
+    },
+    "com/bawnorton/neruina/mixin/catchers/forge/PlayerInventory47219Mixin": {
+      "Lnet/minecraft/item/ItemStack;inventoryTick(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;IZ)V": "Lnet/minecraft/world/item/ItemStack;m_41666_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;IZ)V",
+      "updateItems": "Lnet/minecraft/world/entity/player/Inventory;m_36068_()V"
+    },
+    "com/bawnorton/neruina/mixin/catchers/fabric/PlayerInventoryMixin": {
+      "Lnet/minecraft/item/ItemStack;inventoryTick(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;IZ)V": "Lnet/minecraft/world/item/ItemStack;m_41666_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;IZ)V",
+      "updateItems": "Lnet/minecraft/world/entity/player/Inventory;m_36068_()V"
+    },
+    "com/bawnorton/neruina/mixin/catchers/ServerWorldMixin": {
+      "Lnet/minecraft/block/BlockState;randomTick(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/random/Random;)V": "Lnet/minecraft/world/level/block/state/BlockState;m_222972_(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V",
+      "onBlockChanged": "Lnet/minecraft/server/level/ServerLevel;m_6559_(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V",
+      "tick": "Lnet/minecraft/server/level/ServerLevel;m_8793_(Ljava/util/function/BooleanSupplier;)V",
+      "tickChunk": "Lnet/minecraft/server/level/ServerLevel;m_8714_(Lnet/minecraft/world/level/chunk/LevelChunk;I)V"
+    },
+    "com/bawnorton/neruina/mixin/catchers/neoforge/PlayerInventoryMixin": {
+      "Lnet/minecraft/item/ItemStack;inventoryTick(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;IZ)V": "Lnet/minecraft/world/item/ItemStack;m_41666_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;IZ)V",
+      "updateItems": "Lnet/minecraft/world/entity/player/Inventory;m_36068_()V"
+    },
+    "com/bawnorton/neruina/mixin/catchers/WorldChunkMixin$DirectBlockEntityTickInvokerMixin": {
+      "net.minecraft.world.chunk.WorldChunk$DirectBlockEntityTickInvoker": "net/minecraft/world/level/chunk/LevelChunk$BoundTickingBlockEntity",
+      "Lnet/minecraft/block/entity/BlockEntityTicker;tick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/entity/BlockEntity;)V": "Lnet/minecraft/world/level/block/entity/BlockEntityTicker;m_155252_(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
+      "tick": "Lnet/minecraft/world/level/chunk/LevelChunk$BoundTickingBlockEntity;m_142224_()V"
+    },
+    "com/bawnorton/neruina/mixin/compat/noseenotick/WorldMixin": {
+      "Lnet/minecraft/entity/TickOptimizer;entityTicking(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;Lnet/minecraft/world/World;Lnet/minecraft/util/math/random/Random;)V": "Lnet/minecraft/entity/TickOptimizer;entityTicking(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/Level;Lnet/minecraft/util/RandomSource;)V",
+      "tickEntity": "Lnet/minecraft/world/level/Level;m_46653_(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V",
+      "shouldUpdatePostDeath": "Lnet/minecraft/world/level/Level;m_183599_(Lnet/minecraft/world/entity/Entity;)Z"
+    },
+    "com/bawnorton/neruina/mixin/accessor/WorldChunkAccessor": {
+      "removeBlockEntityTicker": "m_156412_(Lnet/minecraft/core/BlockPos;)V"
+    },
+    "com/bawnorton/neruina/mixin/errorable/BlockEntityMixin": {
+      "writeNbt": "Lnet/minecraft/world/level/block/entity/BlockEntity;m_183515_(Lnet/minecraft/nbt/CompoundTag;)V",
+      "readNbt": "Lnet/minecraft/world/level/block/entity/BlockEntity;m_142466_(Lnet/minecraft/nbt/CompoundTag;)V"
+    },
+    "com/bawnorton/neruina/mixin/catchers/PlayerInventoryMixin": {
+      "readNbt": "Lnet/minecraft/world/entity/player/Inventory;m_36035_(Lnet/minecraft/nbt/ListTag;)V"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "com/bawnorton/neruina/mixin/catchers/WorldMixin": {
+        "tickEntity": "Lnet/minecraft/world/level/Level;m_46653_(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V",
+        "shouldUpdatePostDeath": "Lnet/minecraft/world/level/Level;m_183599_(Lnet/minecraft/world/entity/Entity;)Z"
+      },
+      "com/bawnorton/neruina/mixin/catchers/ServerPlayNetworkHandlerMixin": {
+        "tick": "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;m_9933_()V",
+        "Lnet/minecraft/server/network/ServerPlayerEntity;playerTick()V": "Lnet/minecraft/server/level/ServerPlayer;m_9240_()V"
+      },
+      "com/bawnorton/neruina/mixin/errorable/ItemStackMixin": {
+        "<init>(Lnet/minecraft/nbt/NbtCompound;)V": "Lnet/minecraft/world/item/ItemStack;<init>(Lnet/minecraft/nbt/CompoundTag;)V"
+      },
+      "com/bawnorton/neruina/mixin/errorable/EntityMixin": {
+        "writeNbt": "Lnet/minecraft/world/entity/Entity;m_20240_(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;",
+        "isInvulnerableTo": "Lnet/minecraft/world/entity/Entity;m_6673_(Lnet/minecraft/world/damagesource/DamageSource;)Z",
+        "Lnet/minecraft/entity/Entity;onGround:Z": "Lnet/minecraft/world/entity/Entity;f_19861_:Z",
+        "readNbt": "Lnet/minecraft/world/entity/Entity;m_20258_(Lnet/minecraft/nbt/CompoundTag;)V"
+      },
+      "com/bawnorton/neruina/mixin/compat/doespotatotick/WorldMixin": {
+        "tickEntity": "Lnet/minecraft/world/level/Level;m_46653_(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V",
+        "shouldUpdatePostDeath": "Lnet/minecraft/world/level/Level;m_183599_(Lnet/minecraft/world/entity/Entity;)Z"
+      },
+      "com/bawnorton/neruina/mixin/PlayerManagerMixin": {
+        "onPlayerConnect": "Lnet/minecraft/server/players/PlayerList;m_11261_(Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;)V"
+      },
+      "com/bawnorton/neruina/mixin/catchers/WorldChunkMixin": {
+        "removeBlockEntity": "Lnet/minecraft/world/level/chunk/LevelChunk;m_8114_(Lnet/minecraft/core/BlockPos;)V"
+      },
+      "com/bawnorton/neruina/mixin/compat/itshallnottick/WorldMixin": {
+        "Lnet/minecraft/entity/TickOptimizer;entityTicking(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;Lnet/minecraft/world/World;Lnet/minecraft/util/math/random/Random;)V": "Lnet/minecraft/entity/TickOptimizer;entityTicking(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/Level;Lnet/minecraft/util/RandomSource;)V",
+        "tickEntity": "Lnet/minecraft/world/level/Level;m_46653_(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V",
+        "shouldUpdatePostDeath": "Lnet/minecraft/world/level/Level;m_183599_(Lnet/minecraft/world/entity/Entity;)Z"
+      },
+      "com/bawnorton/neruina/mixin/MinecraftServerMixin": {
+        "Lnet/minecraft/server/MinecraftServer;createMetadata()Lnet/minecraft/server/ServerMetadata;": "Lnet/minecraft/server/MinecraftServer;m_271988_()Lnet/minecraft/network/protocol/status/ServerStatus;",
+        "runServer": "Lnet/minecraft/server/MinecraftServer;m_130011_()V",
+        "shutdown": "Lnet/minecraft/server/MinecraftServer;m_7041_()V"
+      },
+      "com/bawnorton/neruina/mixin/catchers/forge/PlayerInventory47220Mixin": {
+        "Lnet/minecraft/item/ItemStack;onInventoryTick(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;II)V": "Lnet/minecraft/world/item/ItemStack;onInventoryTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;II)V",
+        "updateItems": "Lnet/minecraft/world/entity/player/Inventory;m_36068_()V"
+      },
+      "com/bawnorton/neruina/mixin/catchers/forge/PlayerInventory47219Mixin": {
+        "Lnet/minecraft/item/ItemStack;inventoryTick(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;IZ)V": "Lnet/minecraft/world/item/ItemStack;m_41666_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;IZ)V",
+        "updateItems": "Lnet/minecraft/world/entity/player/Inventory;m_36068_()V"
+      },
+      "com/bawnorton/neruina/mixin/catchers/fabric/PlayerInventoryMixin": {
+        "Lnet/minecraft/item/ItemStack;inventoryTick(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;IZ)V": "Lnet/minecraft/world/item/ItemStack;m_41666_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;IZ)V",
+        "updateItems": "Lnet/minecraft/world/entity/player/Inventory;m_36068_()V"
+      },
+      "com/bawnorton/neruina/mixin/catchers/ServerWorldMixin": {
+        "Lnet/minecraft/block/BlockState;randomTick(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/random/Random;)V": "Lnet/minecraft/world/level/block/state/BlockState;m_222972_(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V",
+        "onBlockChanged": "Lnet/minecraft/server/level/ServerLevel;m_6559_(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;)V",
+        "tick": "Lnet/minecraft/server/level/ServerLevel;m_8793_(Ljava/util/function/BooleanSupplier;)V",
+        "tickChunk": "Lnet/minecraft/server/level/ServerLevel;m_8714_(Lnet/minecraft/world/level/chunk/LevelChunk;I)V"
+      },
+      "com/bawnorton/neruina/mixin/catchers/neoforge/PlayerInventoryMixin": {
+        "Lnet/minecraft/item/ItemStack;inventoryTick(Lnet/minecraft/world/World;Lnet/minecraft/entity/Entity;IZ)V": "Lnet/minecraft/world/item/ItemStack;m_41666_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;IZ)V",
+        "updateItems": "Lnet/minecraft/world/entity/player/Inventory;m_36068_()V"
+      },
+      "com/bawnorton/neruina/mixin/catchers/WorldChunkMixin$DirectBlockEntityTickInvokerMixin": {
+        "net.minecraft.world.chunk.WorldChunk$DirectBlockEntityTickInvoker": "net/minecraft/world/level/chunk/LevelChunk$BoundTickingBlockEntity",
+        "Lnet/minecraft/block/entity/BlockEntityTicker;tick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/entity/BlockEntity;)V": "Lnet/minecraft/world/level/block/entity/BlockEntityTicker;m_155252_(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
+        "tick": "Lnet/minecraft/world/level/chunk/LevelChunk$BoundTickingBlockEntity;m_142224_()V"
+      },
+      "com/bawnorton/neruina/mixin/compat/noseenotick/WorldMixin": {
+        "Lnet/minecraft/entity/TickOptimizer;entityTicking(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;Lnet/minecraft/world/World;Lnet/minecraft/util/math/random/Random;)V": "Lnet/minecraft/entity/TickOptimizer;entityTicking(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/Level;Lnet/minecraft/util/RandomSource;)V",
+        "tickEntity": "Lnet/minecraft/world/level/Level;m_46653_(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V",
+        "shouldUpdatePostDeath": "Lnet/minecraft/world/level/Level;m_183599_(Lnet/minecraft/world/entity/Entity;)Z"
+      },
+      "com/bawnorton/neruina/mixin/accessor/WorldChunkAccessor": {
+        "removeBlockEntityTicker": "m_156412_(Lnet/minecraft/core/BlockPos;)V"
+      },
+      "com/bawnorton/neruina/mixin/errorable/BlockEntityMixin": {
+        "writeNbt": "Lnet/minecraft/world/level/block/entity/BlockEntity;m_183515_(Lnet/minecraft/nbt/CompoundTag;)V",
+        "readNbt": "Lnet/minecraft/world/level/block/entity/BlockEntity;m_142466_(Lnet/minecraft/nbt/CompoundTag;)V"
+      },
+      "com/bawnorton/neruina/mixin/catchers/PlayerInventoryMixin": {
+        "readNbt": "Lnet/minecraft/world/entity/player/Inventory;m_36035_(Lnet/minecraft/nbt/ListTag;)V"
+      }
+    }
+  }
+}
