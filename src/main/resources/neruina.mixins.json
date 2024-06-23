@@ -25,7 +25,6 @@
     "compat.itshallnottick.WorldMixin",
     "compat.noseenotick.WorldMixin",
     "errorable.BlockEntityMixin",
-    "errorable.BlockStateMixin",
     "errorable.EntityMixin",
     "errorable.ItemStackMixin"
   ],
