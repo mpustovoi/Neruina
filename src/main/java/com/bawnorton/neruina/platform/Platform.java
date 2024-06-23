@@ -1,11 +1,8 @@
 package com.bawnorton.neruina.platform;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 /*? if fabric {*/
-/*import com.bawnorton.neruina.Neruina;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -60,8 +57,10 @@ public final class Platform {
         return FabricLoader.getInstance().getEnvironmentType().equals(EnvType.CLIENT);
     }
 }
-*//*?} elif forge {*/
+/*?} elif forge {*/
 /*import java.util.List;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -121,7 +120,9 @@ public final class Platform {
     }
 }
 *//*?} elif neoforge {*/
-import java.util.List;
+/*import java.util.List;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.FMLPaths;
@@ -179,4 +180,4 @@ public final class Platform {
         return FMLLoader.getDist().isClient();
     }
 }
-/*?}*/
+*//*?}*/

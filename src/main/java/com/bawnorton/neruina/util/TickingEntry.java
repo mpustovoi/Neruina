@@ -82,7 +82,7 @@ public final class TickingEntry {
         populate(section);
         return report.asString(
             //? if >=1.20.7
-            /*net.minecraft.util.crash.ReportType.MINECRAFT_CRASH_REPORT*/
+            net.minecraft.util.crash.ReportType.MINECRAFT_CRASH_REPORT
         );
     }
 

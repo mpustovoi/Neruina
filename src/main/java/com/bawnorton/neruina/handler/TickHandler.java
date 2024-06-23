@@ -4,11 +4,11 @@ import com.bawnorton.neruina.Neruina;
 import com.bawnorton.neruina.config.Config;
 import com.bawnorton.neruina.exception.TickingException;
 import com.bawnorton.neruina.extend.Errorable;
-import com.bawnorton.neruina.extend.ErrorableBlockState;
 import com.bawnorton.neruina.handler.client.ClientTickHandler;
 import com.bawnorton.neruina.mixin.accessor.WorldChunkAccessor;
 import com.bawnorton.neruina.platform.Platform;
 import com.bawnorton.neruina.util.ErroredType;
+import com.bawnorton.neruina.util.MultiSetMap;
 import com.bawnorton.neruina.util.TickingEntry;
 import com.bawnorton.neruina.version.VersionedText;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -41,6 +41,7 @@ import java.util.function.Consumer;
 public final class TickHandler {
     private final List<TickingEntry> recentErrors = new ArrayList<>();
     private final Map<UUID, TickingEntry> tickingEntries = new HashMap<>();
+    private final MultiSetMap<BlockState, BlockPos> erroredBlockStates = new MultiSetMap<>();
     private int stopwatch = 0;
 
     public void tick() {
@@ -341,10 +342,7 @@ public final class TickHandler {
     }
 
     public boolean isErrored(BlockState state, BlockPos pos) {
-        if (state instanceof ErrorableBlockState errorable) {
-            return errorable.neruina$isErrored(pos);
-        }
-        return false;
+        return erroredBlockStates.contains(state, pos);
     }
 
     private void addErrored(Object obj) {
@@ -354,9 +352,7 @@ public final class TickHandler {
     }
 
     private void addErrored(BlockState state, BlockPos pos) {
-        if (state instanceof ErrorableBlockState errorable) {
-            errorable.neruina$setErrored(pos);
-        }
+        erroredBlockStates.put(state, pos);
     }
 
     public void removeErrored(Object obj) {
@@ -367,9 +363,7 @@ public final class TickHandler {
     }
 
     public void removeErrored(BlockState state, BlockPos pos) {
-        if (state instanceof ErrorableBlockState errorable) {
-            errorable.neruina$clearErrored(pos);
-        }
+        erroredBlockStates.remove(state, pos);
     }
 
     public @Nullable TickingEntry getTickingEntry(UUID uuid) {
