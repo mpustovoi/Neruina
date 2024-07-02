@@ -2,7 +2,6 @@ package com.bawnorton.neruina.command;
 
 import com.bawnorton.neruina.Neruina;
 import com.bawnorton.neruina.extend.Errorable;
-import com.bawnorton.neruina.extend.ErrorableBlockState;
 import com.bawnorton.neruina.handler.MessageHandler;
 import com.bawnorton.neruina.handler.TickHandler;
 import com.bawnorton.neruina.report.GithubAuthManager;
@@ -160,7 +159,7 @@ public final class NeruinaCommandHandler {
         BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
         BlockState blockState = context.getSource().getWorld().getBlockState(pos);
         String name = blockState.getBlock().getName().getString();
-        if (!((ErrorableBlockState) blockState).neruina$isErrored(pos)) {
+        if (!(Neruina.getInstance().getTickHandler().isErrored(blockState, pos))) {
             context.getSource().sendError(messageHandler.formatText(
                     "commands.neruina.resume.block_state.not_errored",
                     name,

@@ -3,6 +3,7 @@
 - Add Minecraft 1.21 support
 - Migrate gradle to kotlin dsl
 - Update stonecutter to 0.4
+- Fix excessive memory usage for tracking errored blockstates
 
 # 2.0.0-beta.10
 

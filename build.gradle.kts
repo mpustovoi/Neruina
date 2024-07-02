@@ -3,7 +3,7 @@
 plugins {
     `maven-publish`
     kotlin("jvm") version "1.9.22"
-    id("dev.architectury.loom") version "1.6-SNAPSHOT"
+    id("dev.architectury.loom") version "1.7-SNAPSHOT"
     id("architectury-plugin") version "3.4-SNAPSHOT"
     id("me.modmuss50.mod-publish-plugin") version "0.5.+"
 }
@@ -60,7 +60,7 @@ val mod = ModData()
 val loader = LoaderData()
 val minecraftVersion = MinecraftVersionData()
 
-version = "${mod.version}+$minecraftVersion"
+version = "${mod.version}-$loader+$minecraftVersion"
 group = mod.group
 base.archivesName.set(mod.name)
 
