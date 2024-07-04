@@ -1,3 +1,7 @@
+# 2.1.1
+
+- Fix version ranges
+
 # 2.1.0
 
 - Add Minecraft 1.21 support
