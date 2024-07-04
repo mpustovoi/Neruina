@@ -13,6 +13,16 @@ stonecutter registerChiseled tasks.register("chiseledPublishMods", stonecutter.c
     ofTask("publishMods")
 }
 
+stonecutter registerChiseled tasks.register("chiseledPublishMavenLocal", stonecutter.chiseled) {
+    group = "publishing"
+    ofTask("publishMavenPublicationToMavenLocal")
+}
+
+stonecutter registerChiseled tasks.register("chiseledPublishMavenRemote", stonecutter.chiseled) {
+    group = "publishing"
+    ofTask("publishMavenPublicationToBawnortonRepository")
+}
+
 stonecutter configureEach {
     val current = project.property("loom.platform")
     val platforms = listOf("fabric", "forge", "neoforge").map { it to (it == current) }
