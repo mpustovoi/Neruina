@@ -26,11 +26,11 @@ class LoaderData {
 
     fun getVersion() : String? {
         return if(isForge) {
-            property("loader_forge")?.toString()
+            property("forge_loader")?.toString()
         } else if (isNeoForge) {
-            property("loader_neoforge")?.toString()
+            property("neoforge_loader")?.toString()
         } else {
-            null
+            property("fabric_loader")?.toString()
         }
     }
 
