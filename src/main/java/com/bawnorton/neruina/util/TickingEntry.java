@@ -10,10 +10,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.transformer.meta.MixinMerged;
 import java.lang.reflect.Method;
@@ -30,6 +34,7 @@ import java.util.function.Supplier;
 public final class TickingEntry {
     private final Supplier<@Nullable Object> causeSupplier;
     private final boolean persitent;
+    private final RegistryKey<World> dimension;
     private final BlockPos pos;
     private final Throwable error;
     private final UUID uuid;
@@ -40,9 +45,10 @@ public final class TickingEntry {
             Neruina.MOD_ID, "minecraft", "forge", "neoforge"
     );
 
-    public TickingEntry(Object cause, boolean persitent, BlockPos pos, Throwable error) {
+    public TickingEntry(Object cause, boolean persitent, RegistryKey<World> dimension, BlockPos pos, Throwable error) {
         this.causeSupplier = () -> cause;
         this.persitent = persitent;
+        this.dimension = dimension;
         this.pos = pos;
         this.error = error;
         this.uuid = UUID.randomUUID();
@@ -50,9 +56,10 @@ public final class TickingEntry {
         this.update();
     }
 
-    private TickingEntry(Supplier<@Nullable Object> causeSupplier, boolean persitent, BlockPos pos, UUID uuid, Throwable error) {
+    private TickingEntry(Supplier<@Nullable Object> causeSupplier, boolean persitent, RegistryKey<World> dimension, BlockPos pos, UUID uuid, Throwable error) {
         this.causeSupplier = causeSupplier;
         this.persitent = persitent;
+        this.dimension = dimension;
         this.pos = pos;
         this.uuid = uuid;
         this.error = error;
@@ -183,6 +190,7 @@ public final class TickingEntry {
         nbt.putString("causeType", getCauseType());
         nbt.putString("causeName", getCauseName());
         nbt.putUuid("uuid", uuid);
+        nbt.putString("dimension", dimension.getValue().toString());
         nbt.putLong("pos", pos.asLong());
         writeStackTraceNbt(nbt);
         if (cause instanceof Entity entity) {
@@ -221,6 +229,13 @@ public final class TickingEntry {
         String causeType = nbtCompound.getString("causeType");
         String causeName = nbtCompound.getString("causeName");
         UUID uuid = nbtCompound.getUuid("uuid");
+        String dimensionStr = nbtCompound.getString("dimension");
+        RegistryKey<World> dimension;
+        if(dimensionStr != null) {
+            dimension = RegistryKey.of(RegistryKeys.WORLD, Identifier.tryParse(dimensionStr));
+        } else {
+            dimension = World.OVERWORLD;
+        }
         BlockPos pos = BlockPos.fromLong(nbtCompound.getLong("pos"));
         Throwable error = readStackTraceNbt(nbtCompound);
         Supplier<Object> cause = () -> null;
@@ -234,7 +249,7 @@ public final class TickingEntry {
         } else if (causeType.equals(Type.BLOCK_STATE.type)) {
             cause = () -> world.getBlockState(pos);
         }
-        TickingEntry entry = new TickingEntry(cause, true, pos, uuid, error);
+        TickingEntry entry = new TickingEntry(cause, true, dimension, pos, uuid, error);
         entry.cachedCauseType = causeType;
         entry.cachedCauseName = causeName;
         return entry;
@@ -286,6 +301,10 @@ public final class TickingEntry {
         }
     }
 
+    public RegistryKey<World> dimension() {
+        return dimension;
+    }
+
     public BlockPos pos() {
         return pos;
     }
@@ -313,6 +332,7 @@ public final class TickingEntry {
         var that = (TickingEntry) obj;
         return Objects.equals(this.cachedCauseName, that.cachedCauseName) &&
                 Objects.equals(this.cachedCauseType, that.cachedCauseType) &&
+                Objects.equals(this.dimension, that.dimension) &&
                 Objects.equals(this.pos, that.pos) &&
                 Objects.equals(this.uuid, that.uuid) &&
                 Objects.equals(this.error, that.error);
@@ -320,12 +340,12 @@ public final class TickingEntry {
 
     @Override
     public int hashCode() {
-        return Objects.hash(cachedCauseType, cachedCauseName, pos, uuid, error);
+        return Objects.hash(cachedCauseType, cachedCauseName, dimension, pos, uuid, error);
     }
 
     @Override
     public String toString() {
-        return "TickingEntry[causeType=%s, causeName=%s, pos=%s, uuid=%s, error=%s]".formatted(cachedCauseType, cachedCauseName, pos, uuid, error);
+        return "TickingEntry[causeType=%s, causeName=%s, dimension=%s pos=%s, uuid=%s, error=%s]".formatted(cachedCauseType, cachedCauseName, dimension, pos, uuid, error);
     }
 
     private record Type<T>(String type, Function<T, String> nameFunction) {

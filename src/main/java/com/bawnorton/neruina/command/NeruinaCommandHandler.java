@@ -394,7 +394,7 @@ public final class NeruinaCommandHandler {
                                                     messageHandler.posAsNums(entry.pos())
                                             )
                                     ),
-                                    messageHandler.generateTeleportAction(ErroredType.UNKNOWN, entry.pos()),
+                                    messageHandler.generateTeleportAction(ErroredType.UNKNOWN, entry.dimension(), entry.pos()),
                                     messageHandler.generateResourceActions(entry)
                             )
                     )
@@ -427,7 +427,7 @@ public final class NeruinaCommandHandler {
                                             entry.getCauseName(),
                                             messageHandler.posAsNums(entry.pos())
                                     )),
-                                    messageHandler.generateHandlingActions(ErroredType.BLOCK_ENTITY, entry.pos()),
+                                    messageHandler.generateHandlingActions(ErroredType.BLOCK_ENTITY, entry.dimension(), entry.pos()),
                                     messageHandler.generateResourceActions(entry)
                             )
                     )

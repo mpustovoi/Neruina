@@ -8,6 +8,7 @@ import com.bawnorton.neruina.util.TickingEntry;
 import com.bawnorton.neruina.version.VersionedText;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -15,6 +16,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -63,7 +65,7 @@ public final class MessageHandler {
     public Text generateEntityActions(Entity entity) {
         return VersionedText.concatDelimited(
                 VersionedText.SPACE,
-                generateHandlingActions(ErroredType.ENTITY, entity.getBlockPos(), entity.getUuid()),
+                generateHandlingActions(ErroredType.ENTITY, entity.getWorld().getRegistryKey(), entity.getBlockPos(), entity.getUuid()),
                 generateKillAction(entity.getUuid())
         );
     }
@@ -79,14 +81,14 @@ public final class MessageHandler {
         );
     }
 
-    public Text generateHandlingActions(ErroredType type, BlockPos pos) {
-        return generateHandlingActions(type, pos, null);
+    public Text generateHandlingActions(ErroredType type, RegistryKey<World> dimension, BlockPos pos) {
+        return generateHandlingActions(type, dimension, pos, null);
     }
 
-    public Text generateHandlingActions(ErroredType type, BlockPos pos, @Nullable UUID uuid) {
+    public Text generateHandlingActions(ErroredType type, RegistryKey<World> dimension, BlockPos pos, @Nullable UUID uuid) {
         return VersionedText.concatDelimited(
                 VersionedText.SPACE,
-                generateTeleportAction(type, pos),
+                generateTeleportAction(type, dimension, pos),
                 generateResumeAction(type, uuid != null ? uuid.toString() : posAsNums(pos))
         );
     }
@@ -113,12 +115,12 @@ public final class MessageHandler {
         );
     }
 
-    public Text generateTeleportAction(ErroredType type, BlockPos pos) {
+    public Text generateTeleportAction(ErroredType type, RegistryKey<World> dimension, BlockPos pos) {
         return generateCommandAction(
                 "neruina.teleport",
                 "neruina.teleport.%s.tooltip".formatted(type.getName()),
                 Formatting.DARK_AQUA,
-                "/tp @s %s".formatted(posAsNums(pos))
+                "/execute in %s run tp @s %s".formatted(dimension.getValue().toString(), posAsNums(pos))
         );
     }
 
