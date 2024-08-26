@@ -8,7 +8,6 @@ import com.bawnorton.neruina.util.TickingEntry;
 import com.bawnorton.neruina.version.VersionedText;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -23,6 +22,12 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+//? if >1.19.2 {
+import net.minecraft.registry.RegistryKey;
+//?} else {
+/*import net.minecraft.util.registry.RegistryKey;
+*///?}
 
 public final class MessageHandler {
     public void broadcastToPlayers(MinecraftServer server, Text message) {

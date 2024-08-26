@@ -18,8 +18,8 @@ public abstract class MinecraftServerMixin {
         Neruina.getInstance().getPersitanceHandler((MinecraftServer) (Object) this);
         Storage.init((MinecraftServer) (Object) this);
     }
-    /*?} elif >=1.19 {*//*
-    @Inject(method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;setFavicon(Lnet/minecraft/server/ServerMetadata;)V", ordinal = 0))
+    /*?} elif >=1.19 {*/
+    /*@Inject(method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;setFavicon(Lnet/minecraft/server/ServerMetadata;)V", ordinal = 0))
     private void onServerStart(CallbackInfo ci) {
         Neruina.getInstance().getAutoReportHandler().init((MinecraftServer) (Object) this);
         Neruina.getInstance().getTickHandler().init();

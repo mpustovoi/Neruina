@@ -1,3 +1,7 @@
+# 2.1.2
+
+- Add dimension support to teleport action
+
 # 2.1.1
 
 - Fix version ranges

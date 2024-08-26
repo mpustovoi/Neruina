@@ -10,8 +10,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.crash.CrashReport;
@@ -30,6 +28,14 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+//? if >1.19.2 {
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+//?} else {
+/*import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.util.registry.Registry;
+*///?}
 
 public final class TickingEntry {
     private final Supplier<@Nullable Object> causeSupplier;
@@ -232,7 +238,11 @@ public final class TickingEntry {
         String dimensionStr = nbtCompound.getString("dimension");
         RegistryKey<World> dimension;
         if(dimensionStr != null) {
+            //? if >1.19.2 {
             dimension = RegistryKey.of(RegistryKeys.WORLD, Identifier.tryParse(dimensionStr));
+            //?} else {
+            /*dimension = RegistryKey.of(Registry.WORLD_KEY, Identifier.tryParse(dimensionStr));
+            *///?}
         } else {
             dimension = World.OVERWORLD;
         }

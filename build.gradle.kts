@@ -242,7 +242,6 @@ publishMods {
         accessToken = providers.gradleProperty("GITHUB_TOKEN")
         repository = "Bawnorton/Neruina"
         commitish = "stonecutter"
-        changelog = getRootProject().file("CHANGELOG.md").readLines().joinToString("\n")
         tagName = tag
     }
 
